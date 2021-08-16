@@ -1,0 +1,368 @@
+<?php
+  // Define the CC transaction config parameters
+  define("CC_PROG_NAME", "/usr/local/bin/lansend");
+  define("CC_SERVER", "Z");
+  define("CC_DEVICE", "0");
+  define("CC_OPERID", "001");
+  define("CC_ACTION", "S");
+  define("CC_TERMID", "29006132");
+  // Are we live?
+  define("CC_LIVE", 1);
+
+  // PGP definitions
+  define("PGP_USE", 0);
+  define("PGP_BIN", "/usr/local/bin/pgp");
+  define("PGP_RCPT_PUBKEY_ID", "Nobody <nobody@nowhere.com>");
+
+  // Some email definitions
+  define("MAIL_FROM", "WINCOM Credit Card Processing");
+  define("MAIL_FROMADDR", "ecommerce@wincom.net");
+  define("MAIL_TO", "rotary@wincom.net");
+  define("MAIL_SUBJECT", "Telethon Pledge");
+
+  // Set the URLs for the error page and the completion page
+  define(URL, "http://www.rotary1918.com/cccomplete.htm");
+  define(ERRORURL, "http://www.rotary1918.com/ccerror.htm");
+
+  class Transaction {
+    var $id;
+    var $timestamp;
+    var $refno;
+    var $authno;
+    var $pridisplay;
+    var $result;
+
+    function Transaction ($sql_result_row) {
+      if ($sql_result_row) {
+        $this->id = $sql_result_row[0];
+        $this->timestamp = $sql_result_row[1];
+        $this->refno = stripslashes($sql_result_row[2]);
+        $this->authno = stripslashes($sql_result_row[3]);
+        $this->pridisplay = stripslashes($sql_result_row[4]);
+        $this->result = stripslashes($sql_result_row[5]);
+      }
+      // No parameters, so just return, creating an empty object.
+      else
+        return;
+    }
+  }
+
+  // perform type-specific and mathematical validation
+  // checks on a credit card number
+  function validateCC ($ccnum,  $type  =  'unknown') {
+    $type = strtolower($type);
+    $ccnum = ereg_replace('[-[:space:]]', '', $ccnum);
+
+    //Do  type  specific  check
+    if ($type == 'unknown') {
+      // Skip type specific checks
+    }
+    elseif ($type == 'mastercard') {
+      if (strlen($ccnum) != 16 || !ereg('^5[1-5]', $ccnum))
+        return 0;
+    }
+    elseif ($type == 'visa') {
+      if ((strlen($ccnum) != 13 && strlen($ccnum) != 16) ||
+           substr($ccnum, 0, 1) != '4')
+        return 0;
+    }
+    elseif ($type == 'amex') {
+      if (strlen($ccnum) != 15 || !ereg('^3[47]', $ccnum))
+        return 0;
+    }
+    elseif ($type == 'discover') {
+      if (strlen($ccnum) != 16 || substr($ccnum, 0, 4) != '6011')
+        return 0;
+    }
+    else {
+      // invalid type entered
+      return -1;
+    }
+
+
+    //  Start  MOD  10  checks
+
+    $dig = toCharArray($ccnum);
+    $numdig = sizeof ($dig);
+    $j = 0;
+    for ($i = ($numdig - 2); $i >= 0; $i -= 2) {
+      $dbl[$j] = $dig[$i] * 2;
+      $j++;
+    }
+    $dblsz = sizeof($dbl);
+    $validate = 0;
+    for ($i = 0; $i < $dblsz; $i++) {
+      $add = toCharArray($dbl[$i]);
+      for ($j = 0; $j < sizeof($add); $j++) {
+        $validate += $add[$j];
+      }
+      $add = '';
+    }
+    for ($i = ($numdig - 1); $i >= 0; $i -= 2) {
+      $validate += $dig[$i];
+    }
+    if (substr($validate, -1, 1) == '0')
+      return 1;
+    else
+      return  0;
+  }
+
+  // takes a string and returns an array of characters
+  function toCharArray($input) {
+    $len = strlen($input);
+    for ($j = 0; $j < $len; $j++) {
+      $char[$j] = substr($input, $j, 1);
+    }
+    return ($char);
+  }
+
+  // "x-out" all but the last 4 digits of a credit card number,
+  // returning the resulting string
+  function safeCC($cc_number) {
+    $tmpcc = strrev($cc_number);
+    $foo = strrev($cc_number);
+    for ($x = 4; $x < strlen($tmpcc); $x++) {
+      $tmpcc[$x] = "x";
+    }
+    $cc_plain = strrev($tmpcc);
+
+    return ($cc_plain);
+  }
+
+  // Create a properly formatted monetary value string
+  function format_money ($val) {
+    $money = sprintf("%.2f", $val);
+
+    // strrev() didn't work, for some reason, so do it
+    // manually
+    for ($i = strlen($money) - 1; $i >= 0; $i--)
+      $temp .= $money[$i];
+
+    $money = $temp[0];
+    $money .= $temp[1];
+    $money .= $temp[2];
+
+    for ($i = 3; $i < strlen($temp); $i++) {
+      if ( (($i - 3) % 3) == 0 && $i != 3)
+        $money .= ",";
+
+      $money .= $temp[$i];
+    }
+
+    // strrev() didn't work, for some reason, so do it
+    // manually
+    for ($i = strlen($money) - 1; $i >= 0; $i--)
+      $temp2 .= $money[$i];
+
+    return $temp2;
+  }
+
+
+
+
+  // -------------------------------------------------------------------
+  // Start the program
+  // -------------------------------------------------------------------
+
+  // Use this variable to ensure all input is received.
+  $missing_info = 0;
+
+  // Setup which form inputs are required
+  $required = array("title", "fname", "lname", "address", "city", "state",
+                    "zipcode", "phone", "dollars", "cents", "receipt",
+                    "cctype", "ccnumber", "ccexpmm", "ccexpyyyy");
+
+  // Check to see that all required form inputs are found
+  for ($i = 0; $i < sizeof($required); $i++) {
+    if (!strlen($$required[$i])) {
+      $missing_info = 1;
+      $errmsg = "Please enter all of the required information.";
+      break;
+    }
+  }
+
+  if (!$missing_info) {
+    if ($ccexpyyyy < date("Y")) {
+      $errmsg = "Credit card is expired.";
+      $missing_info = 1;
+    }
+    if ($ccexpyyyy == date("Y")) {
+      if ($ccexpmm < date("m")) {
+        $errmsg = "Credit card is expired.";
+        $missing_info = 1;
+      }
+    }
+
+    if (!validateCC($ccnumber, $cctype)) {
+      $errmsg = "Invalid credit card number.";
+      $missing_info = 1;
+    }
+
+    $foo = "";
+    $foo = ereg_replace('[[:digit:]]', '', $dollars);
+    if (strlen($foo)) {
+      $errmsg = "Invalid character in dollar amount. Please enter the dollar amount only in the dollars field.";
+      $missing_info = 1;
+    }
+
+    $foo = "";
+    $foo = ereg_replace('[[:digit:]]', '', $cents);
+    if (strlen($foo)) {
+      $errmsg = "Invalid character in cents amount. Please enter the cents amount only in the cents field.";
+      $missing_info = 1;
+    }
+  }
+
+
+  // Here's where we do the actual CC transaction!
+  if (!$missing_info) {
+    // Get the time of the transaction
+    $now = time();
+
+    // Take the spaces out of the CC number
+    $cc_number = ereg_replace('[-[:space:]]', '', $ccnumber);
+
+    // Create the 4 digit expiry date string
+    $cc_exp_date = $ccexpmm . $ccexpyyyy[2] . $ccexpyyyy[3];
+
+    // Prepare the money string for transaction by removing 
+    // decimals, commas, etc.
+    // 1000 == $10.00, for example
+    $total = $dollars . "." . $cents;
+    $cc_cost = ereg_replace('[^[:digit:]]', '', format_money($total));
+
+    // Temporary $1.00 cost for testing
+    //$cc_cost = 100;
+
+    // Create a simple order number
+    $order_id = date("0His", $now);
+
+    $exec_str = CC_PROG_NAME . " " . CC_SERVER . " " . CC_DEVICE .
+            " " . CC_TERMID . " " . CC_OPERID . " " . $cc_number .
+            " " . $cc_exp_date . " " . $cc_cost . " " . $order_id .
+            " " . CC_ACTION;
+
+    // Execute the transaction
+    if (CC_LIVE) {
+      $cmd = EscapeShellCmd($exec_str);
+      $cc_result = `$cmd`;
+
+      // Read the result into a new Transaction and add it to the database
+      $result_array = explode(",", $cc_result);
+
+      $transact = new Transaction();
+      $transact->timestamp = time();
+      $transact->refno = trim($result_array[0]);
+      $transact->authno = trim($result_array[1]);
+      $transact->pridisplay = trim($result_array[2]);
+      $transact->result = trim($result_array[3]);
+
+      // If we receive didn't receive an authno, or if the result isn't "0000",
+      // then the transaction failed. It would be nice to have a list of
+      // result codes so that the response could be more accurate.
+      if ($transact->result == "8001") {
+        $missing_info = 1;
+        $errmsg = "Credit card is expired. Please another card.";
+      }
+      elseif ($transact->result == "9998") {
+        $missing_info = 1;
+        $errmsg = "The transaction timed out. Please try again.";
+      }
+      elseif ($transact->result == "9999") {
+        $missing_info = 1;
+        $errmsg = "A transmission error occurred. Please try again later.";
+      }
+      elseif (!$transact->authno || $transact->result != "0000") {
+        $missing_info = 1;
+        $errmsg = "Your credit card was declined. Please try another card.";
+      }
+    }
+  }
+
+  // If the transaction went well, send the email
+  if (!$missing_info) {
+    // Create the email messages
+    $from = "From: " . MAIL_FROM . " <" . MAIL_FROMADDR . ">";
+    $subject = MAIL_SUBJECT . " - #" . $order_id;
+
+    // Generate the receipt.  This will create the "msg" variable
+    // which contains the text receipt. 
+    $safe_ccnumber = safeCC($cc_number);
+    $msg = "2000 Easter Seals Telethon Online Pledge
+
+Remote IP:   " . getenv("REMOTE_ADDR") . "
+Timestamp:   " . date("Y-m-d H:i:s") . "
+
+Ref  #:  " . $transact->refno . "
+Auth #:  " . $transact->authno . "
+
+Sponsor:     " . $title . " " . $fname . " " . $lname . "
+Company:     " . $company . "
+Address:     " . $address . "
+City:        " . $city . "
+Province:    " . $state . "
+Postal Code: " . $zipcode . "
+Telephone:   " . $phone . "
+Email:       " . $email . "
+
+Donation:    \$" . format_money($total) . "
+Card Type:   " . $cctype . "
+Card Number: " . $safe_ccnumber . "
+Expiry Date: " . $ccexpmm . "/" . $ccexpyyyy . "
+
+Receipt?     " . $receipt . "
+";
+
+    // If we are using PGP, encrypt the $msg
+    if (PGP_USE) {
+      $command  = "LOGNAME=httpd; HOME=/usr/local/apache; ";
+      $command .= "USER=httpd; USERNAME=httpd; ";
+      $command .= "echo \"" .  str_replace("\$", "\\$", addslashes($msg_cc)) . "\" | ";
+      $command .= PGP_BIN . " -feat \"" . PGP_RCPT_PUBKEY_ID . "\"";
+
+      exec ($command, $result);
+
+      for ($a = 0; $a < count($result); $a++) {
+        $pgpmsg .= $result[$a] . "\n";
+        $pgpmsg = stripslashes($pgpmsg);
+      }
+    }
+
+    if (PGP_USE)
+      mail(MAIL_TO, $subject, $pgpmsg, $from);
+    else
+      mail(MAIL_TO, $subject, $msg, $from);
+  }
+
+  if ($missing_info)
+    $filename = ERRORURL;
+  else
+    $filename = URL;
+
+  $file = fopen($filename, "r");
+
+  if ($file) {
+    // Read the whole template file into $result
+    while (!feof($file)) {
+      $result .= fgets($file, 1024);
+    }
+
+    fclose($file);
+  }
+  else {
+    echo "Error opening template, ";
+    if ($missing_info)
+      echo "and your transaction was NOT successful.";
+    else
+      echo "however, your transaction was completed successfully.";
+    exit();
+  }
+
+  $result = str_replace("%MSG%", $errmsg, $result);
+  $result = str_replace("%CC_AMOUNT%", format_money($total), $result);
+  $result = str_replace("%CC_REFNO%", $transact->refno, $result);
+  $result = str_replace("%CC_AUTHNO%", $transact->authno, $result);
+  $result = str_replace("%ORDER_RECEIPT%", $msg, $result);
+
+  echo $result;
+?>

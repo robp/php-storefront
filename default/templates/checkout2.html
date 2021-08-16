@@ -1,0 +1,77 @@
+<html>
+
+<head>
+<title>%STORE_NAME%: Checkout</title>
+</head>
+
+<body bgcolor=#FFFFFF>
+<font face="Arial, MS Sans Serif, Helvetica" size=2>
+<h1>%STORE_NAME%</h1>
+
+<h3>Checkout</h3>
+
+We respect your right to privacy, and will not disclose or sell information about you or your purchases to any outside organization for solicitation purposes without your consent.<p>
+
+<b><font color=Red>%MSG%</font></b><p>
+
+<form action="checkout.phtml" method="post">
+<input type=hidden name="step" value="2">
+
+<img height=1 hspace=0 vspace=4 width=350 border=0 alt=Image align=middle src="img/pixelblack.gif"><br>
+<font size=3><b>Billing Information</b></font><p>
+
+<blockquote>
+
+<a href="register.phtml?url=checkout.phtml">Edit this information</a>, or <a href="logout.phtml">Log Out</a> to use another account.<p>
+
+<b>Address</b><br>
+%BILL_FNAME% %BILL_LNAME%<br>
+%BILL_ADDRESS1% %BILL_ADDRESS2%<br>
+%BILL_CITY% %BILL_STATE%, %BILL_COUNTRY%<br>
+%BILL_ZIPCODE%
+
+<p>
+
+<b>Contacts</b><br>
+Daytime: %BILL_PHONE1%<br>
+Evening: %BILL_PHONE2%<br>
+Email: %BILL_EMAIL%
+
+<p>
+
+<font size=1>Please double-check your email address to be sure you<br>
+receive your electronic receipt.</font>
+
+</blockquote>
+
+<p>
+
+<img height=1 hspace=0 vspace=4 width=350 border=0 alt=Image align=middle src="img/pixelblack.gif"><br>
+<font size=3><b>Shipping Information</b></font><p>
+
+Select an addressbook entry for shipping. <a href="addressbook.phtml">Update Addressbook</a>.<p>
+
+
+<select name="ship_to" size=5>
+%BEGIN_ADDRESSBOOK_LOOP%
+<option value="%ADDRESS_ID%">%ADDRESS_FNAME% %ADDRESS_LNAME%, %ADDRESS_ADDRESS1%, %ADDRESS_CITY%, %ADDRESS_COUNTRY%, %ADDRESS_ZIPCODE%</option>
+%END_ADDRESSBOOK_LOOP%
+</select>
+
+<p>
+
+<table border=0 width=100% cellpadding=0 cellspacing=0>
+<tr><td align=right>
+<font face="Arial, MS Sans Serif, Helvetica" size=2>
+<input width=86 border=0 height=26 alt=Continue type=image name="Continue" src="img/buttoncontinue.gif">
+</font>
+</td></tr>
+</table>
+
+</form>
+
+</font>
+</body>
+
+</html>
+

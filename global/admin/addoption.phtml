@@ -1,0 +1,254 @@
+<?php
+  // IMPORTANT NOTE: 
+  // When modifying this script, check to see if any changes here
+  // need to be replicated in the "additem.phtml" script b/c it
+  // shares a lot of code with this script.
+  //
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  html_head();
+
+  // Setup which form inputs are required
+  $required1 = array("sku", "new_sku", "new_name", "new_price", "new_weight");
+
+  // Check to see that all required form inputs are found
+  if ($step) {
+    for ($i = 0; $i < sizeof($required1); $i++) {
+      if (!$$required1[$i]) {
+        $missing_info = 1;
+        break;
+      }
+    }
+  }
+
+  if ($sku && !$step) {
+    $skus = explode(",", $sku);
+    $sku = $skus[0];
+  }
+
+  if ($sku) {
+    $item = new Item(0, $sku);
+    if (!$item->sku) {
+      $errmsg = "SKU '$sku' does not exist in database.";
+      $sku = 0;
+    }
+    else {
+
+      if (!$step) {
+        $new_category = $item->category;
+        $new_sku = $item->sku;
+        $new_name = $item->name;
+        $new_price = $item->price;
+        $new_pst = $item->pst;
+        $new_gst = $item->gst;
+        $new_weight = $item->weight;
+        $new_weight_type = $item->weight_type;
+        $new_option1 = $item->option1;
+        $new_option2 = $item->option2;
+        $new_option3 = $item->option3;
+        $new_option4 = $item->option4;
+        $new_option5 = $item->option5;
+        $new_option6 = $item->option6;
+        $new_option7 = $item->option7;
+        $new_option8 = $item->option8;
+        $new_option9 = $item->option9;
+        $new_option10 = $item->option10;
+      }
+    }
+  }
+
+  if ($sku && $step) {
+    if ($missing_info) {
+      $errmsg = "You didn't enter all the required information.";
+    }
+    else {
+      if (db_item_exists("sku", "'$new_sku'", "items")) {
+        $errmsg = "New SKU already exists in database.";
+        $missing_info = 1;
+      }
+      else {
+        $query = "SELECT id FROM items
+                  WHERE id = $item->id
+                    AND option1 = '$new_option1'
+                    AND option2 = '$new_option2'
+                    AND option3 = '$new_option3'
+                    AND option4 = '$new_option4'
+                    AND option5 = '$new_option5'
+                    AND option6 = '$new_option6'
+                    AND option7 = '$new_option7'
+                    AND option8 = '$new_option8'
+                    AND option9 = '$new_option9'
+                    AND option10 = '$new_option10'";
+
+        if (!$sql_result = mysql_query($query, $sock)) {
+          echo mysql_error();
+          html_exit();
+        }
+        
+        if (mysql_num_rows($sql_result) != 0) {
+          $errmsg = "Option combination for this item already exists in database.";
+          $missing_info = 1;
+        }
+      }
+    }
+  }
+
+  if ($step && !$missing_info) {
+    sprintf($price, "%.2f", $price);
+
+    $item->category = $new_category;
+    $item->sku = $new_sku;
+    $item->name = $new_name;
+    $item->price = $new_price;
+    $item->pst = $new_pst;
+    $item->gst = $new_gst;
+    $item->weight = $new_weight;
+    $item->weight_type = $new_weight_type;
+    $item->option1 = $new_option1;
+    $item->option2 = $new_option2;
+    $item->option3 = $new_option3;
+    $item->option4 = $new_option4;
+    $item->option5 = $new_option5;
+    $item->option6 = $new_option6;
+    $item->option7 = $new_option7;
+    $item->option8 = $new_option8;
+    $item->option9 = $new_option9;
+    $item->option10 = $new_option10;
+
+    $item->insert();
+
+    $errmsg = "The item has been inserted.";
+  }
+?>
+
+<a href="viewitems.phtml"><font color=Green>View Items</font></a> |
+<a href="additem.phtml"><font color=Green>Add Items</font></a> |
+<b>Add Item Options</b> |
+<a href="moditem.phtml"><font color=Green>Modify Items</font></a> |
+<a href="delitem.phtml"><font color=Green>Delete Items</font></a>
+
+<hr noshade size=1>
+
+<p>
+
+<b><?php echo $errmsg ?></b><p>
+
+<?php
+  //
+  // If no original sku has been specified (or one that doesn't exist was
+  // specified), then print the default form to ask for a sku
+  //
+  if (!$sku):
+?>
+
+Enter the SKU of the item you wish to add options to.<p>
+
+<form action="<?php echo $PHP_SELF ?>" method="get">
+
+SKU <input type=text name="sku" size=20 maxlength=40> <input type=submit value="Add Options">
+
+</form>
+
+<?php
+  else:
+?>
+
+<form action="<?php echo $PHP_SELF ?>" method="post">
+<input type=hidden name="step" value="1">
+<input type=hidden name="sku" value="<?php echo $sku ?>">
+
+<input type=reset value="Reset"> &nbsp;&nbsp; <input type=submit value="Continue">
+
+<p>
+
+Category<br>
+<select name="new_category"><option value="0">None
+
+<?php
+  list_categories_select($new_category, 1);
+?>
+
+</select><p>
+
+SKU<br>
+<input type=text name="new_sku" value="<?php echo htmlspecialchars($new_sku) ?>" size=40 maxlength=40><p><p>
+
+Name<br>
+<input type=text name="new_name" value="<?php echo htmlspecialchars($new_name) ?>" size=60 maxlength=80><p>
+
+<table border=0 cellpadding=0 cellspacing=0>
+<tr>
+<td valign=top>
+<?php echo FONT1 ?>
+Price (##.##)<br>
+<input type=text name="new_price" value="<?php echo $new_price ?>" size=20 maxlength=20><p>
+
+<input type=checkbox name="new_gst" value="1"<?php if ($new_gst) echo " checked"; ?>> Charge GST where applicable?<br>
+<input type=checkbox name="new_pst" value="1"<?php if ($new_pst) echo " checked"; ?>> Charge PST where applicable?<p>
+</font>
+</td>
+
+<td width=50></td>
+
+<td valign=top>
+<?php echo FONT1 ?>
+Weight (##.##)<br>
+<input type=text name="new_weight" value="<?php echo $new_weight ?>" size=20 maxlength=20><p>
+
+<input type=radio name="new_weight_type" value="0"<?php if ($new_weight_type == 0) echo " checked"; ?>> Kilograms<br>
+<input type=radio name="new_weight_type" value="1"<?php if ($new_weight_type == 1) echo " checked"; ?>> Pounds<br>
+</font>
+</td>
+</tr>
+</table>
+
+<p>
+
+<table border=0>
+<tr>
+<td><?php echo FONT1 ?>Option 1<br><input type=text name="new_option1" value="<?php echo htmlspecialchars($new_option1) ?>" size=30 maxlength=40></font></td>
+<td width=10> </td>
+<td><?php echo FONT1 ?>Option 2<br><input type=text name="new_option2" value="<?php echo htmlspecialchars($new_option2) ?>" size=30 maxlength=40></font></td>
+</tr>
+<tr>
+<td><?php echo FONT1 ?>Option 3<br><input type=text name="new_option3" value="<?php echo htmlspecialchars($new_option3) ?>" size=30 maxlength=40></font></td>
+<td width=10> </td>
+<td><?php echo FONT1 ?>Option 4<br><input type=text name="new_option4" value="<?php echo htmlspecialchars($new_option4) ?>" size=30 maxlength=40></font></td>
+</tr>
+<tr>
+<td><?php echo FONT1 ?>Option 5<br><input type=text name="new_option5" value="<?php echo htmlspecialchars($new_option5) ?>" size=30 maxlength=40></font></td>
+<td width=10> </td>
+<td><?php echo FONT1 ?>Option 6<br><input type=text name="new_option6" value="<?php echo htmlspecialchars($new_option6) ?>" size=30 maxlength=40></font></td>
+</tr>
+<tr>
+<td><?php echo FONT1 ?>Option 7<br><input type=text name="new_option7" value="<?php echo htmlspecialchars($new_option7) ?>" size=30 maxlength=40></font></td>
+<td width=10> </td>
+<td><?php echo FONT1 ?>Option 8<br><input type=text name="new_option8" value="<?php echo htmlspecialchars($new_option8) ?>" size=30 maxlength=40></font></td>
+</tr>
+<tr>
+<td><?php echo FONT1 ?>Option 9<br><input type=text name="new_option9" value="<?php echo htmlspecialchars($new_option9) ?>" size=30 maxlength=40></font></td>
+<td width=10> </td>
+<td><?php echo FONT1 ?>Option 10<br><input type=text name="new_option10" value="<?php echo htmlspecialchars($new_option10) ?>" size=30 maxlength=40></font></td>
+</tr>
+</table>
+
+<p>
+
+<input type=reset value="Reset"> &nbsp;&nbsp; <input type=submit value="Continue">
+
+<?php
+  endif;
+?>
+
+<?php
+  html_tail();
+?>

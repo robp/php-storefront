@@ -1,0 +1,136 @@
+<html>
+
+<head>
+<title>%STORE_NAME%: Addressbook</title>
+</head>
+
+<body bgcolor=#FFFFFF>
+<font face="Arial, MS Sans Serif, Helvetica" size=2>
+<h1>%STORE_NAME%</h1>
+
+<h3>Address Book</h3>
+
+<b>for %USER_FNAME% %USER_LNAME%</b><p>
+
+<b><font color=Red>%MSG%</font></b><p>
+
+Here you can store your shipping address and those of friends and family. This enables you to check out quickly and easily. You can add, delete and change addresses at any time.<p>
+
+<ul>
+<li><a href="address.phtml">Click here to add a new address</a>.
+</ul>
+
+<p>
+
+<table border=1 cellpadding=6 cellspacing=0>
+<tr bgcolor=#000000>
+<th>
+<font face="Arial, MS Sans Serif, Helvetica" size=2 color=White>
+Your Address
+</font>
+</th>
+<th>
+<font face="Arial, MS Sans Serif, Helvetica" size=2 color=White>
+Nickname
+</font>
+</th>
+<th>
+<font face="Arial, MS Sans Serif, Helvetica" size=2 color=White>
+&nbsp;
+</font>
+</th>
+<th>
+<font face="Arial, MS Sans Serif, Helvetica" size=2 color=White>
+&nbsp;
+</font>
+</th>
+</tr>
+
+<tr bgcolor=#F5F3C4>
+<td>
+<font face="Arial, MS Sans Serif, Helvetica" size=2>
+%USER_FNAME% %USER_LNAME%<br>
+%USER_ADDRESS1%<br>
+%USER_CITY%, %USER_COUNTRY%, %USER_ZIPCODE%
+</font>
+</td>
+<td align=center valign=center>
+<font face="Arial, MS Sans Serif, Helvetica" size=2>
+<b>%USER_USERNAME%</b>
+</font>
+</td>
+<td align=center valign=center>
+<font face="Arial, MS Sans Serif, Helvetica" size=2>
+<a href="register.phtml?url=addressbook.phtml">Edit</a>
+</font>
+</td>
+<td>
+&nbsp;
+</td>
+</tr>
+
+<tr>
+<td height=10></td>
+</tr>
+
+<tr bgcolor=#000000>
+<th>
+<font face="Arial, MS Sans Serif, Helvetica" size=2 color=White>
+Other Shipping Addresses
+</font>
+</th>
+<th>
+<font face="Arial, MS Sans Serif, Helvetica" size=2 color=White>
+Nickname
+</font>
+</th>
+<th>
+<font face="Arial, MS Sans Serif, Helvetica" size=2 color=White>
+&nbsp;
+</font>
+</th>
+<th>
+<font face="Arial, MS Sans Serif, Helvetica" size=2 color=White>
+&nbsp;
+</font>
+</th>
+</tr>
+
+%BEGIN_LOOP%
+
+<tr bgcolor=#F5F3C4>
+<td>
+<font face="Arial, MS Sans Serif, Helvetica" size=2>
+%ADDRESS_FNAME% %ADDRESS_LNAME%<br>
+%ADDRESS_ADDRESS1%<br>
+%ADDRESS_CITY%, %ADDRESS_COUNTRY%, %ADDRESS_ZIPCODE%
+</font>
+</td>
+<td align=center valign=center>
+<font face="Arial, MS Sans Serif, Helvetica" size=2>
+<b>%ADDRESS_DESCRIPTION%</b>
+</font>
+</td>
+<td align=center valign=center>
+<font face="Arial, MS Sans Serif, Helvetica" size=2>
+<a href="address.phtml?id=%ADDRESS_ID%">Edit</a>
+</font>
+</td>
+<td align=center valign=center>
+<font face="Arial, MS Sans Serif, Helvetica" size=2>
+<a href="address.phtml?id=%ADDRESS_ID%&delete=1">Remove</a>
+</font>
+</td>
+</tr>
+
+%END_LOOP%
+
+</table>
+
+<p>
+
+</font>
+</body>
+
+</html>
+

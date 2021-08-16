@@ -1,0 +1,138 @@
+<?php
+  // IMPORTANT NOTE: 
+  // When modifying this script, check to see if any changes here
+  // need to be replicated in the "additem.phtml" script b/c it
+  // shares a lot of code with this script.
+  //
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  html_head();
+
+  // Setup which form inputs are required
+  $required1 = array("id", "new_parent_id", "new_name");
+
+  // Check to see that all required form inputs are found
+  if ($step) {
+    for ($i = 0; $i < sizeof($required1); $i++) {
+      if (!strlen($$required1[$i])) {
+        $missing_info = 1;
+        break;
+      }
+    }
+  }
+
+  if ($step && $missing_info)
+    $errmsg = "You didn't enter all the required information.";
+
+  if ($id) {
+    if (!db_item_exists("id", "$id", "categories")) {
+      $errmsg = "Category '$id' does not exist in database.";
+      $id = 0;
+    }
+  }
+
+  if ($id) {
+    $category = new Category(0, $id);
+
+    if (!$step) {
+      $new_parent_id = $category->parent_id;
+      $new_name = $category->name;
+      $new_template_id = $category->template_id;
+      $new_desc_short = $category->desc_short;
+      $new_desc_long1 = $category->desc_long1;
+      $new_desc_long2 = $category->desc_long2;
+      $new_img_small = $category->img_small;
+      $new_img_medium = $category->img_medium;
+      $new_img_large = $category->img_large;
+    }
+  }
+
+  if ($step && !$missing_info) {
+    $category->parent_id = $new_parent_id;
+    $category->template_id = $new_template_id;
+    $category->name = trim($new_name);
+    $category->desc_short = trim($new_desc_short);
+    $category->desc_long1 = trim($new_desc_long1);
+    $category->desc_long2 = trim($new_desc_long2);
+    $category->img_small = trim($new_img_small);
+    $category->img_medium = trim($new_img_medium);
+    $category->img_large = trim($new_img_large);
+
+    $category->update();
+
+    $errmsg = "The category has been updated.";
+  }
+?>
+
+<h2>Modify A Category</h2>
+
+<b><?php echo $errmsg ?></b><p>
+
+<form action="<?php echo $PHP_SELF ?>" method="post">
+<input type=hidden name="step" value="1">
+<input type=hidden name="id" value="<?php echo $id ?>">
+
+<table border=0 width=500>
+<tr>
+<td><?php echo FONT1 ?><input type=reset value="Undo Changes"> &nbsp; <input type=submit value="Submit Changes"></font></td>
+<td align=right><?php echo FONT1 ?><a href="<?php echo $config->store_url ?>dyn/category.phtml?id=<?php echo $category->id ?>" target="_new">View This Category</a></font></td>
+</tr>
+</table>
+
+<p>
+
+<table border=0>
+<tr><td><?php echo FONT1 ?>Parent Name:</font></td><td><?php echo FONT1 ?><select name="new_parent_id"><option value="0">None
+<?php
+    list_categories_select($new_parent_id, 1);
+?>
+</select></font></td></tr>
+
+<tr><td><?php echo FONT1 ?>Category Name:</font></td><td><?php echo FONT1 ?><input type=text name="new_name" value="<?php echo htmlspecialchars($new_name) ?>" size=40 maxlength=80></font></td></tr>
+
+<tr><td><?php echo FONT1 ?><br><b>Options:</b><br><br></font></td></tr>
+
+<tr><td><?php echo FONT1 ?>Template:</font></td><td><?php echo FONT1 ?><select name="new_template_id"><option value="0">None
+<?php
+    list_category_templates_select($new_template_id, 1);
+?>
+</select></font></td></tr>
+
+<tr><td colspan=2><font face="Arial, MS Sans Serif, Helvetica" size="-1"><h4>Enter descriptions for this category (may contain HTML)</font></td></tr>
+<tr><td><font face="Arial, MS Sans Serif, Helvetica" size="-1">Short Description</font></td><td><font face="Arial, MS Sans Serif, Helvetica" size="-1"><input type=text name="new_desc_short" value="<?php echo htmlspecialchars($new_desc_short) ?>" size=40 maxlength=200></font></td></tr>
+<tr><td><font face="Arial, MS Sans Serif, Helvetica" size="-1">Long Description #1</font></td><td><font face="Arial, MS Sans Serif, Helvetica" size="-1"><textarea name="new_desc_long1" rows=6 cols=40><?php echo $new_desc_long1 ?></textarea></font></td></tr>
+<tr><td><font face="Arial, MS Sans Serif, Helvetica" size="-1">Long Description #2</font></td><td><font face="Arial, MS Sans Serif, Helvetica" size="-1"><textarea name="new_desc_long2" rows=6 cols=40><?php echo $new_desc_long2 ?></textarea></font></td></tr>
+
+<tr><td><br></td></tr>
+<tr><td colspan=2><font face="Arial, MS Sans Serif, Helvetica" size="-1"><h4>Enter URLs for images (full path or relative)</font></td></tr>
+<tr><td><font face="Arial, MS Sans Serif, Helvetica" size="-1">Image URL Small</font></td><td><font face="Arial, MS Sans Serif, Helvetica" size="-1"><input type=text name="new_img_small" value="<?php echo htmlspecialchars($new_img_small) ?>" size=40 maxlength=200></font></td></tr>
+<tr><td><font face="Arial, MS Sans Serif, Helvetica" size="-1">Image URL Medium</font></td><td><font face="Arial, MS Sans Serif, Helvetica" size="-1"><input type=text name="new_img_medium" value="<?php echo htmlspecialchars($new_img_medium) ?>" size=40 maxlength=200></font></td></tr>
+<tr><td><font face="Arial, MS Sans Serif, Helvetica" size="-1">Image URL Large</font></td><td><font face="Arial, MS Sans Serif, Helvetica" size="-1"><input type=text name="new_img_large" value="<?php echo htmlspecialchars($new_img_large) ?>" size=40 maxlength=200></font></td></tr>
+
+</table>
+
+<p>
+
+<table border=0 width=500>
+<tr>
+<td><?php echo FONT1 ?><input type=reset value="Undo Changes"> &nbsp; <input type=submit value="Submit Changes"></font></td>
+<td align=right><?php echo FONT1 ?><a href="<?php echo $config->store_url ?>dyn/category.phtml?id=<?php echo $category->id ?>" target="_new">View This Category</a></font></td>
+</tr>
+</table>
+
+</form>
+
+<p>
+
+<?php
+  html_tail();
+?>

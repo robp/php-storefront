@@ -1,0 +1,38 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  $sock = db_connect();
+  $config = new Config();
+
+  if ($sku && is_array($sku)) {
+    $qs = "?sku=";
+    for ($a = 0; $a < count($sku); $a++) {
+      if ($a) $qs .= ",";
+      $qs .= $sku[$a];
+    }
+
+    if ($addoption || $addoption_x)
+      $url = "index.phtml?s=inventory&f=addoption.phtml";
+    elseif ($moditem || $moditem_x)
+      $url = "index.phtml?s=inventory&f=moditem.phtml";
+    elseif ($delitem || $delitem_x)
+      $url = "index.phtml?s=inventory&f=delitem.phtml";
+    elseif ($addsale || $addsale_x)
+      $url = "index.phtml?s=sales&f=addsale.phtml";
+    elseif ($adddiscount || $adddiscount_x)
+      $url = "index.phtml?s=sales&f=adddiscount.phtml";
+    else
+      $url = "index.phtml?s=inventory&f=viewitems.phtml";
+
+    $url .= $qs;
+  }
+  else
+    $url = "index.phtml?s=inventory&f=viewitems.phtml";
+
+  header("Location: $url\n\n");
+?>

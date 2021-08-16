@@ -1,0 +1,34 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  html_head();
+?>
+
+<b>View Categories</b> |
+<a href="addcat.phtml"><font color=Green>Add Categories</font></a> |
+<a href="delcat.phtml"><font color=Green>Delete Categories</font></a>
+
+<hr noshade size=1>
+
+<p>
+
+Each item is in the following format:<p>
+
+ID. Name (# Items) [Template]<p>
+
+<?php
+  list_categories_recursive(0);
+?>
+
+<?php
+  html_tail();
+?>

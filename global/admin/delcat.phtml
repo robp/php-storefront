@@ -1,0 +1,104 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  html_head();
+
+  // Setup which form inputs are required
+  $required1 = array("id");
+
+  // Check to see that all required form inputs are found
+  for ($i = 0; $i < sizeof($required1); $i++) {
+    if (!$$required1[$i]) {
+      $missing_info = 1;
+      break;
+    }
+  }
+
+  // If inputs are missing, print a message
+  if ($step && $missing_info) {
+    echo "<b>You didn't enter all of the required information.</b><p>\n";
+  }
+  elseif ($step && !$missing_info) {
+    $category = new Category(0, $id);
+
+    $query = "UPDATE categories
+              SET parent_id = $new_parent_id
+              WHERE parent_id = $category->id";
+
+    if (!$sql_result = mysql_query($query, $sock)) {
+      echo mysql_error();
+      html_exit();
+    }
+
+    $query = "UPDATE items
+              SET category = $new_parent_id
+              WHERE category = $category->id";
+
+    if (!$sql_result = mysql_query($query, $sock)) {
+      echo mysql_error();
+      html_exit();
+    }
+
+    $category->delete();
+
+    $errmsg = "Category deleted.";
+  }
+?>
+
+<a href="viewcats.phtml"><font color=Green>View Categories</font></a> |
+<a href="addcat.phtml"><font color=Green>Add Categories</font></a> |
+<b>Delete Categories</b>
+
+<hr noshade size=1>
+
+<p>
+
+<b><?php echo $errmsg ?></b><p>
+
+Use this form to remove categories from the inventory database.<p>
+
+Select the name of the category as it appears in menus, listings, etc.<p>
+
+<form action="<?php echo $PHP_SELF ?>" method="post">
+<input type=hidden name="step" value=1>
+<table border=0>
+<tr><td><?php echo FONT1 ?><b>Remove Category:</b></font></td><td><?php echo FONT1 ?><select name="id">
+
+<?php
+    list_categories_select(0, 1);
+?>
+
+</select></font></td></tr>
+</table>
+
+<p>
+
+Select the name fo the category that you wish to move all of the contents of this category into after it is removed.<p>
+
+<table border=0>
+<tr><td><?php echo FONT1 ?><b>Move Contents To:</b></font></td><td><?php echo FONT1 ?><select name="new_parent_id"><option value="0">None
+
+<?php
+    list_categories_select(0, 1);
+?>
+
+</select></font></td></tr>
+</table>
+
+<p>
+
+<input type=submit value="    Remove Category   ">
+</form>
+
+<?php
+  html_tail();
+?>

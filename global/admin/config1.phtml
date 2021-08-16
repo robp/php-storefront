@@ -1,0 +1,173 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  // Setup which form inputs are required
+  $required1 = array("new_store_name", "new_store_url", "new_store_address_1",
+                     "new_store_city", "new_store_state", "new_store_country",
+                     "new_store_zip", "new_store_phone");
+
+  // Check to see that all required form inputs are found
+  if ($step) {
+    for ($i = 0; $i < sizeof($required1); $i++) {
+      if (!strlen($$required1[$i])) {
+        $missing_info = 1;
+        break;
+      }
+    }
+  }
+
+  if ($step && $missing_info)
+    $errmsg = "You didn't enter all the required information.";
+
+  if (!$step) {
+    $new_store_name = $config->store_name;
+    $new_store_url = $config->store_url;
+    $new_store_address_1 = $config->store_address_1;
+    $new_store_address_2 = $config->store_address_2;
+    $new_store_city = $config->store_city;
+    $new_store_state = $config->store_state;
+    $new_store_country = $config->store_country;
+    $new_store_zip = $config->store_zip;
+    $new_store_phone = $config->store_phone;
+    $new_store_fax = $config->store_fax;
+  }
+
+  if ($step && !$missing_info) {
+    $config->store_name = $new_store_name;
+    $config->store_url = $new_store_url;
+    $config->store_address_1 = $new_store_address_1;
+    $config->store_address_2 = $new_store_address_2;
+    $config->store_city = $new_store_city;
+    $config->store_state = $new_store_state;
+    $config->store_country = $new_store_country;
+    $config->store_zip = $new_store_zip;
+    $config->store_phone = $new_store_phone;
+    $config->store_fax = $new_store_fax;
+
+    $config->update();
+
+    header("Location: config2.phtml");
+    exit();
+  }
+
+  html_head();
+?>
+
+<b>Store Configuration Wizard - Step 1 of 4</b>
+
+<hr noshade size=1>
+
+<p>
+
+<b><?php echo $errmsg ?></b><p>
+
+<form action="<?php echo $PHP_SELF ?>" method="post">
+<input type=hidden name="step" value="1">
+
+<center>
+<a href="config1.phtml"><img border=0 src="../img/button-reset.gif" alt="Reset"></a> &nbsp; <input type=image border=0 src="../img/button-next.gif" alt="Next">
+</center>
+
+<p>
+
+<table border=0>
+
+<tr>
+<td><?php echo FONT1 ?>
+<b>Store Name</b>
+</font></td>
+<td>
+<input type=text name="new_store_name" value="<?php echo htmlspecialchars($new_store_name) ?>" size=40 maxlength=200>
+</td>
+</tr>
+
+<tr>
+<td><?php echo FONT1 ?>
+<b>Store URL</b>
+</font></td>
+<td>
+<input type=text name="new_store_url" value="<?php echo htmlspecialchars($new_store_url) ?>" size=40 maxlength=200>
+</td>
+<td><?php echo FONT1 ?>
+(must end with "/")
+</font></td>
+</tr>
+
+<tr>
+<td><?php echo FONT1 ?>
+<b>Street Address 1</b>
+</font></td>
+<td>
+<input type=text name="new_store_address_1" value="<?php echo htmlspecialchars($new_store_address_1) ?>" size=40 maxlength=200>
+</td>
+</tr>
+
+<tr>
+<td><?php echo FONT1 ?>
+Street Address 2
+</font></td>
+<td>
+<input type=text name="new_store_address_2" value="<?php echo htmlspecialchars($new_store_address_2) ?>" size=40 maxlength=200>
+</td>
+</tr>
+
+<tr>
+<td><?php echo FONT1 ?>
+<b>City</b>
+</font></td>
+<td>
+<input type=text name="new_store_city" value="<?php echo htmlspecialchars($new_store_city) ?>" size=15 maxlength=200>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>State</b>
+<input type=text name="new_store_state" value="<?php echo htmlspecialchars($new_store_state) ?>" size=15 maxlength=200>
+</td>
+</tr>
+
+<tr>
+<td><?php echo FONT1 ?>
+<b>Country</b>
+</font></td>
+<td>
+<input type=text name="new_store_country" value="<?php echo htmlspecialchars($new_store_country) ?>" size=15 maxlength=200>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Zip</b>
+<input type=text name="new_store_zip" value="<?php echo htmlspecialchars($new_store_zip) ?>" size=15 maxlength=200>
+</td>
+</tr>
+
+<tr>
+<td><?php echo FONT1 ?>
+<b>Telephone #</b>
+</font></td>
+<td>
+<input type=text name="new_store_phone" value="<?php echo htmlspecialchars($new_store_phone) ?>" size=40 maxlength=200>
+</td>
+</tr>
+
+<tr>
+<td><?php echo FONT1 ?>
+Facsimile #
+</font></td>
+<td>
+<input type=text name="new_store_fax" value="<?php echo htmlspecialchars($new_store_fax) ?>" size=40 maxlength=200>
+</td>
+</tr>
+
+</table>
+
+<p>
+
+<center>
+<a href="config1.phtml"><img border=0 src="../img/button-reset.gif" alt="Reset"></a> &nbsp; <input type=image border=0 src="../img/button-next.gif" alt="Next">
+</center>
+
+<?php
+  html_tail();
+?>

@@ -1,0 +1,68 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  html_head();
+
+  // Setup which form inputs are required
+  $required1 = array("filename", "description", "type");
+
+  // Check to see that all required form inputs are found
+  for ($i = 0; $i < sizeof($required1); $i++) {
+    if (!strlen($$required1[$i])) {
+      $missing_info = 1;
+      break;
+    }
+  }
+
+  // If inputs are missing, print a message
+  if ($step && $missing_info) {
+    echo "<b>You didn't enter all of the required information.</b><p>\n";
+  }
+  elseif ($step && !$missing_info) {
+    $template = new Template();
+    $template->type = $type;
+    $template->filename = trim($filename);
+    $template->description = trim($description);
+    $template->insert();
+    $errmsg  = "Template added.";
+  }
+?>
+
+<b><?php echo $errmsg ?></b><p>
+
+
+<a href="deltemplate.phtml"><font color=Green>View Templates</font></a> |
+<b>Add Templates</b>
+
+<hr noshade size=1>
+
+<p>
+
+Use this form to add new templates to the database.<br>
+New templates will automatically appear in the menus for dynamic items.<p>
+
+<b>Template location:</b> <?php echo $config->template_url ?><p>
+
+<form action="<?php echo $PHP_SELF ?>" method="post">
+<input type=hidden name="step" value=1>
+<table border=0>
+<tr><td><?php echo FONT1 ?>Type:</font></td><td><?php echo FONT1 ?><select name="type"><option value="0">Product<option value="1">Category</select></font></td></tr>
+<tr><td><?php echo FONT1 ?>File name:</font></td><td><?php echo FONT1 ?><input type=text name="filename" size=40 maxlength=80></font></td></tr>
+<tr><td><?php echo FONT1 ?>Description:</font></td><td><?php echo FONT1 ?><input type=text name="description" size=40 maxlength=200></font></td></tr>
+<tr><td></td><td><?php echo FONT1 ?><br><input type=submit value="    Add Template   "></font></td></tr>
+</table>
+</form>
+
+
+<?php
+  html_tail();
+?>

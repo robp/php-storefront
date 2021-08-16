@@ -1,0 +1,284 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  if ($id)
+    $shipzone = new ShippingZone(0, $id);
+
+  if (!$shipzone->id) {
+    echo "Invalid zone id.";
+    exit();
+  }
+
+  if ($copy_to && $copy_multiplier) {
+    $dest_zone = new ShippingZone(0, $copy_to);
+
+    if ($dest_zone->id) {
+      // Delete the destination zone's current costs for this model
+      if ($config->shipping_model == 0)
+        $table = "shipping_price_threshold";
+      elseif ($config->shipping_model == 1)
+        $table = "shipping_weight_threshold";
+      elseif ($config->shipping_model == 2)
+        $table = "shipping_quantity_threshold";
+
+      $query = "DELETE FROM $table
+                WHERE zone_id = " . $dest_zone->id;
+
+      if (!$sql_result = mysql_query($query, $sock)) {
+        echo mysql_error();
+        html_exit();
+      }
+
+      $query = "SELECT * FROM $table
+                WHERE zone_id = " . $shipzone->id;
+
+      if (!$sql_result = mysql_query($query, $sock)) {
+        echo mysql_error();
+        html_exit();
+      }
+
+      for ($a = 0; $a < mysql_num_rows($sql_result); $a++) {
+        if ($config->shipping_model == 0)
+          $threshold = new ShippingPriceThreshold(mysql_fetch_row($sql_result), 0);
+        elseif ($config->shipping_model == 1)
+          $threshold = new ShippingWeightThreshold(mysql_fetch_row($sql_result), 0);
+        elseif ($config->shipping_model == 2)
+          $threshold = new ShippingQuantityThreshold(mysql_fetch_row($sql_result), 0);
+
+        $threshold->zone_id = $dest_zone->id;
+        $threshold->cost = $threshold->cost * $copy_multiplier;
+        $threshold->insert();
+      }
+
+      $errmsg = "Shipping costs copied.";
+    }
+    else {
+      $errmsg = "Destination zone does not exist.";
+    }
+  }
+
+  if (!$step) {
+    $new_description = $shipzone->description;
+    $new_tax = $shipzone->tax;
+    $new_tax_rate = $shipzone->tax_rate;
+
+    $query = "SELECT * FROM shipping_type_assignments
+              WHERE zone_id = $shipzone->id";
+
+    if (!$sql_result = mysql_query($query, $sock)) {
+      echo mysql_error();
+      html_exit();
+    }
+
+    for ($a = 0; $a < mysql_num_rows($sql_result); $a++) {
+      $shiptype = new ShippingType(mysql_fetch_row($sql_result), 0);
+      $new_ship_types[] = $shiptype->id;
+    }
+  }
+
+  if ($step && $new_description) {
+    $new_description = trim($new_description);
+
+    $shipzone->description = $new_description;
+    $shipzone->tax = $new_tax;
+    $shipzone->tax_rate = (float) $new_tax_rate;
+    $shipzone->update();
+
+    // Delete the old type assignments for this zone, 
+    // then add the new ones
+    $query = "DELETE FROM shipping_type_assignments
+              WHERE zone_id = $shipzone->id";
+
+    if (!$sql_result = mysql_query($query, $sock)) {
+      echo mysql_error();
+      html_exit();
+    }
+
+    // add the new shipping type assignments to the zone
+    for ($a = 0; $a < count($new_ship_types); $a++) {
+      $shiptypeassign = new ShippingTypeAssignment();
+      $shiptypeassign->type_id = $new_ship_types[$a];
+      $shiptypeassign->zone_id = $shipzone->id;
+      $shiptypeassign->insert();
+    }
+
+    $errmsg = "Shipping Zone updated.";
+  }
+
+  html_head();
+?>
+
+<a href="shiptypes.phtml"><font color=Green>Shipping Types</font></a> |
+<b>Shipping Zones</b> |
+<a href="modshiplocs.phtml"><font color=Green>Zone Assignments</font></a>
+
+<hr noshade size=1>
+
+<p>
+
+<?php if ($errmsg) echo "<b>$errmsg</b><p>\n\n"; ?>
+
+<ul>
+<li><a href="shipzones.phtml">Back to Shipping Zones</a>
+</ul>
+
+<p>
+
+<form action="<?php echo $PHP_SELF ?>" method="post">
+<input type=hidden name="id" value="<?php echo $shipzone->id ?>">
+<input type=hidden name="step" value="1">
+
+<table width=496 border=0>
+<tr>
+<td><?php echo FONT1 ?><font size=+1><b><?php echo $shipzone->id . ". " . $new_description ?></b></font></font></td>
+<td align=right><?php echo FONT1 ?><input type=reset value="     Reset     "> &nbsp; <input type=submit value="Update Zone"></font></td>
+</tr>
+</table>
+
+<p>
+
+<table border=0 cellpadding=2 cellspacing=0>
+
+<tr>
+<td><?php echo FONT1 ?><b>Description</b></font></td>
+<td><input type=text name="new_description" size=25 maxlength=200 value="<?php echo $new_description ?>"></td>
+</tr>
+
+<tr><td>&nbsp;</td></tr>
+
+<tr>
+<td><?php echo FONT1 ?><b>Tax Shipping?</b><font></td>
+<td><?php echo FONT1 ?>
+<?php
+  echo "<input type=radio name=\"new_tax\" value=\"0\"";
+  if ($new_tax == 0) echo "checked";
+  echo "> No &nbsp;&nbsp; <input type=radio name=\"new_tax\" value=\"1\"";
+  if ($new_tax == 1) echo "checked";
+  echo "> Yes";
+?>
+</font></td>
+</tr>
+
+<tr>
+<td><?php echo FONT1 ?><b>Tax Rate</b></font></td>
+<td><input type=text name="new_tax_rate" size=10 maxlength=10 value="<?php printf("%.2f", $new_tax_rate) ?>"></td>
+</tr>
+
+<tr><td>&nbsp;</td></tr>
+
+<tr>
+<td><?php echo FONT1 ?><b>Used By</b></font></td>
+<td><?php echo FONT1 ?>
+<?php
+  $query = "SELECT * FROM shipping_zone_assignments
+            WHERE zone_id = $shipzone->id";
+
+  if (!$sql_result = mysql_query($query, $sock)) {
+    echo mysql_error();
+    html_exit();
+  }
+
+  for ($a = 0; $a < mysql_num_rows($sql_result); $a++) {
+    $shipzoneassign = new ShippingZoneAssignment(mysql_fetch_row($sql_result), 0);
+
+    for ($b = 0; $b < count($PROVINCES_STATES); $b++) {
+      if ($shipzoneassign->state == $PROVINCES_STATES[$b][0]) {
+        $state = $PROVINCES_STATES[$b][1];
+      }
+    }
+
+    if ($a) echo ", ";
+    echo "(" . $shipzoneassign->state . ") " . $state;
+  }
+?>
+</font></td>
+</tr>
+
+<td><td>&nbsp;</td></tr>
+
+<tr>
+<td><?php echo FONT1 ?><b>Shipping Types</b><font></td>
+<td><?php echo FONT1 ?>
+<?php 
+  $query = "SELECT * FROM shipping_types";
+
+  if (!$sql_result = mysql_query($query, $sock)) {
+    echo mysql_error();
+    html_exit();
+  }
+
+  for ($a = 0; $a < mysql_num_rows($sql_result); $a++) {
+    $shiptype = new ShippingType(mysql_fetch_row($sql_result), 0);
+    $str = "";
+
+    for ($b = 0; $b < count($new_ship_types); $b++) {
+      if ($shiptype->id == $new_ship_types[$b])
+        $str = " checked";
+    }
+
+    printf("<input type=checkbox name=\"new_ship_types[]\" value=\"%d\"%s> %s (<a href=\"modmodel.phtml?zone_id=%d&type_id=%d\">Adjust Shipping Costs</a>)<br>\n", $shiptype->id, $str, $shiptype->description, $shipzone->id, $shiptype->id);
+  }
+?>
+</font></td>
+</tr>
+  
+</table>
+
+</form>
+
+<hr noshade width=490 align=left>
+
+<h3>Copy Shipping Costs</h3>
+
+You can copy the shipping costs for this zone to any other zone. This will overwrite (delete) any existing costs for the current shipping model in that zone!<p>
+
+<form action="<?php echo $PHP_SELF ?>" method="post">
+<input type=hidden name="id" value="<?php echo $shipzone->id ?>">
+
+<table border=0>
+<tr>
+<td><?php echo FONT1 ?><b>Copy to:</b></font></td>
+<td><?php echo FONT1 ?>
+<select name="copy_to">
+<?php
+  $query = "SELECT * FROM shipping_zones
+            WHERE id <> " . $shipzone->id;
+
+  if (!$sql_result = mysql_query($query, $sock)) {
+    echo mysql_error();
+    html_exit();
+  }
+
+  for ($a = 0; $a < mysql_num_rows($sql_result); $a++) {
+    $zone = new ShippingZone(mysql_fetch_row($sql_result), 0);
+    printf("<option value=\"%d\">%s", $zone->id, $zone->description);
+  }
+?>
+</select>
+</td>
+<td rowspan=2>
+<input type=submit value="Copy">
+</td>
+</tr>
+
+<tr>
+<td><?php echo FONT1 ?><b>Multiplier:</b></font></td>
+<td><input type=text name="copy_multiplier" size=10 value="1.00"></td>
+</tr>
+</table>
+
+A multiplier value of 1.14 is equal to a 14% increase in shipping costs. A multiplier of 0.94 is equal to a 6% decrease in costs. A value of 1.00 will keep costs the same.
+</form>
+
+<?php
+  html_tail();
+?>

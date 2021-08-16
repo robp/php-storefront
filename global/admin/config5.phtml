@@ -1,0 +1,28 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  html_head();
+?>
+
+<b>Store Configuration Wizard - Finished</b>
+
+<hr noshade size=1>
+
+<p>
+
+Store configuration is complete!<p>
+
+You may now return to the <a href="index.phtml" target="_top">Administrator homepage</a>, or choose another of the links on the menubar above.
+
+<?php
+  html_tail();
+?>

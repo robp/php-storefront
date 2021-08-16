@@ -1,0 +1,53 @@
+<html>
+
+<head>
+<title>%STORE_NAME%: Search Results</title>
+</head>
+
+<body bgcolor=#ffffff>
+
+<center>
+<table border=0 width=80%>
+<tr>
+<td>
+<font face="Arial, MS Sans Serif, Helvetica" size="2">
+
+<center>
+<h1>%STORE_NAME%</h1>
+</center>
+
+<h3>Search Results</h3>
+
+Your search for <b>"%SEARCH_KEYWORDS%"</b> returned <b>%SEARCH_NUM_RESULTS%</b> matches.<p>
+
+<table border=0 cellspacing=5>
+
+%BEGIN_LOOP%
+
+<tr>
+<td valign=top><font face="Arial, MS Sans Serif, Helvetica" size=2>
+%LOOP_ID%.
+</font></td>
+
+<td valign=top>
+<font face="Arial, MS Sans Serif, Helvetica" size=2>
+<b><a href="product.phtml?id=%PRODUCT_ID%">%PRODUCT_DYN_NAME%</a></b><br>
+%PRODUCT_DESC_SHORT%
+</font>
+</td>
+</tr>
+
+%END_LOOP%
+
+</table>
+
+<p>
+
+</font>
+</td>
+</tr>
+</table>
+</center>
+
+</body>
+</html>

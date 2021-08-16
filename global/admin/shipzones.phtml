@@ -1,0 +1,170 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  if ($new_description) {
+    // Insert the new Shipping Zone
+    $new_description = trim($new_description);
+    $shipzone = new ShippingZone();
+    $shipzone->description = $new_description;
+    $shipzone->tax = $new_tax;
+    $shipzone->tax_rate = (float) $new_tax_rate;
+    $shipzone->insert();
+
+    // Assign the shipping types to the new zone
+    for ($a = 0; $a < count($new_ship_types); $a++) {
+      $shiptypeassign = new ShippingTypeAssignment();
+      $shiptypeassign->type_id = $new_ship_types[$a];
+      $shiptypeassign->zone_id = $shipzone->id;
+      $shiptypeassign->insert();
+    }
+
+    $errmsg = "New Shipping Zone added.";
+  }
+
+  if ($delete && is_array($delete)) {
+    // for each item in the delete[] array...
+    for ($a = 0; $a < count($delete); $a++) {
+      $shipzone = new ShippingZone(0, $delete[$a]);
+      if ($shipzone->id) {
+        $shipzone->delete();
+        $found = 1;
+      }
+    }
+
+    if ($found)
+      $errmsg = "Shipping zone removed.";
+  }
+
+  html_head();
+?>
+
+<a href="shiptypes.phtml"><font color=Green>Shipping Types</font></a> |
+<b>Shipping Zones</b> |
+<a href="modshiplocs.phtml"><font color=Green>Zone Assignments</font></a>
+
+<hr noshade size=1>
+
+<p>
+
+<?php if ($errmsg) echo "<b>$errmsg</b><p>\n\n"; ?>
+
+<form action="<?php echo $PHP_SELF ?>" method="post">
+
+<table border=2 cellspacing=0>
+<tr>
+<td><?php echo FONT1 ?><b>Del</b></font></td>
+<td><?php echo FONT1 ?><b>ID</b></font></td>
+<td><?php echo FONT1 ?><b>Description</b></font></td>
+<td><?php echo FONT1 ?><b>Tax Shipping?</b></font></td>
+<td><?php echo FONT1 ?><b>Tax Rate</b></font></td>
+<td><?php echo FONT1 ?><b>Used By</b></font></td>
+<td><?php echo FONT1 ?><b>Types</b></font></td>
+</tr>
+
+<?php
+  $query = "SELECT * FROM shipping_zones";
+
+  if (!$sql_result = mysql_query($query, $sock)) {
+    echo mysql_error();
+    html_exit();
+  }
+
+  for ($a = 0; $a < mysql_num_rows($sql_result); $a++) {
+    $shipzone = new ShippingZone(mysql_fetch_row($sql_result), 0);
+
+    $query = "SELECT COUNT(*) FROM shipping_zone_assignments
+              WHERE zone_id = " . $shipzone->id;
+
+    if (!$sql_result2 = mysql_query($query, $sock)) {
+      echo mysql_error();
+      html_exit();
+    }
+
+    $sql_result_row = mysql_fetch_row($sql_result2);
+    $num_zone_assignments = $sql_result_row[0];
+
+    $query = "SELECT COUNT(*) FROM shipping_type_assignments
+              WHERE zone_id = " . $shipzone->id;
+
+    if (!$sql_result2 = mysql_query($query, $sock)) {
+      echo mysql_error();
+      html_exit();
+    }
+
+    $sql_result_row = mysql_fetch_row($sql_result2);
+    $num_type_assignments = $sql_result_row[0];
+
+    printf("<tr><td align=center valign=center><input type=checkbox name=\"delete[]\" value=\"%d\"></td><td align=center><font size=\"-1\">%d</font></td><td><font size=\"-1\"><a href=\"viewzone.phtml?id=%d\">%s</a></font></td><td align=center><font size=\"-1\">%s</font></td><td align=right><font size=\"-1\">%.2f</font></td><td align=center><font size=\"-1\">%d</font></td><td align=center><font size=\"-1\">%d</font></td></tr>\n",
+      $shipzone->id, $shipzone->id, $shipzone->id, $shipzone->description,
+      ($shipzone->tax == 0 ? "No" : "Yes"), $shipzone->tax_rate,
+      $num_zone_assignments, $num_type_assignments);
+  }
+?>
+</table>
+
+<p>
+
+<input type=submit value="Delete Selected Zones">
+</form>
+
+<p><br>
+
+<hr noshade width=490 align=left>
+
+<h2>Add New Shipping Zone</h2>
+
+<form action="<?php echo $PHP_SELF ?>" method="post">
+
+<table border=0 cellpadding=4 cellspacing=0>
+<tr>
+<td><?php echo FONT1 ?><b>Description</b></font></td>
+<td><input type="text" name="new_description" size=25 maxlength=200></td>
+</tr>
+<tr>
+<td><?php echo FONT1 ?><b>Tax Shipping?</b></font></td>
+<td><?php echo FONT1 ?><input type=radio name="new_tax" value="0" checked> No
+     &nbsp;&nbsp; <input type=radio name="new_tax" value="1"> Yes</td>
+</tr>
+<tr>
+<td><?php echo FONT1 ?><b>Tax Rate</b></font></td>
+<td><input type="text" name="new_tax_rate" size=10 maxlength=10 value="0.00"></td>
+</tr>
+<tr>
+<td><?php echo FONT1 ?><b>Shipping Types</b><font></td>
+<td><?php echo FONT1 ?>
+<?php 
+  $query = "SELECT * FROM shipping_types";
+
+  if (!$sql_result = mysql_query($query, $sock)) {
+    echo mysql_error();
+    html_exit();
+  }
+
+  for ($a = 0; $a < mysql_num_rows($sql_result); $a++) {
+    $shiptype = new ShippingType(mysql_fetch_row($sql_result), 0);
+    printf("<input type=checkbox name=\"new_ship_types[]\" value=\"%d\" checked> %s<br>\n",
+      $shiptype->id, $shiptype->description);
+  }
+?>
+</font></td>
+</tr>
+  
+</table>
+
+<p>
+
+ <input type=submit value="Continue">
+</form>
+
+<?php
+  html_tail();
+?>

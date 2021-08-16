@@ -1,0 +1,164 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  for ($a = 0; $a < count($PROVINCES_STATES); $a++) {
+    $state = $PROVINCES_STATES[$a];
+
+    $shipzoneassign = new ShippingZoneAssignment(0, $state[0]);
+    $state_var = $state[0];
+
+//    echo $state_var . ":" . $$state_var . ":" . isset($$state_var) . "<br>";
+
+    // If we received the variable from the form...
+    if (isset($$state_var)) {
+      // If the variable has a value, that is, if a zone was assigned 
+      // to this state...
+      if ($$state_var) {
+        // If the zone assignment didn't already exist, then assign
+        // the variables and add it
+        if (!$shipzoneassign->zone_id) {
+          $shipzoneassign->zone_id = $$state_var;
+          $shipzoneassign->state = $state_var;
+          $shipzoneassign->insert();
+        }
+        // Otherwise, the assignment did exist, so just update the one
+        // variable and then update the assignment
+        else {
+          $shipzoneassign->zone_id = $$state_var;
+          $shipzoneassign->update();
+        }
+      }
+      // The variable has no value, that means we want to delete the
+      // assignment
+      else {
+        // Only delete it if it existed in the first place
+        if ($shipzoneassign->zone_id) {
+          $count++;
+          $shipzoneassign->delete();
+        }
+      }
+    }
+
+    if (!$shipzoneassign->zone_id) {
+      $count++;
+    }
+  }
+
+  if ($count)
+    $errmsg = "Warning: There are $count states without assignments!";
+
+  html_head();
+?>
+
+<a href="shiptypes.phtml"><font color=Green>Shipping Types</font></a> |
+<a href="shipzones.phtml"><font color=Green>Shipping Zones</font></a> |
+<b>Zone Assignments</b>
+
+<hr noshade size=1>
+
+<p>
+
+<?php if ($errmsg) echo "<b>$errmsg</b><p>\n\n"; ?>
+
+<form action="<?php echo $PHP_SELF ?>" method="post">
+<input type=hidden name="step" value="1">
+
+<center><input type=reset value="          Reset          "> &nbsp;&nbsp; <input type=submit value="          Update          "></center>
+
+<p>
+
+<table border=0 cellpadding=2 cellspacing=0 width=496>
+
+<tr>
+<td valign=top nowrap><?php echo FONT1 ?>
+<h4>Canada</b><p>
+<font face="-1">
+
+<?php
+  $query = "SELECT * FROM shipping_zones";
+
+  if (!$sql_result = mysql_query($query, $sock)) {
+    echo mysql_error();
+    html_exit();
+  }
+
+  for ($a = 0; $a < mysql_num_rows($sql_result); $a++) {
+    $shipzone = new ShippingZone(mysql_fetch_row($sql_result), 0);
+    $shipzones[] = $shipzone;
+  }
+
+  for ($a = 0; $a < count($PROVINCES); $a++) {
+    $state = $PROVINCES[$a];
+    $shipzoneassign = new ShippingZoneAssignment(0, $state[0]);
+
+    echo "<select name=\"$state[0]\"><option value=\"\"><font color=\"Red\"><b>None!</b></font>";
+
+    for ($b = 0; $b < count($shipzones); $b++) {
+      echo "<option value=\"" . $shipzones[$b]->id . "\"" . ($shipzones[$b]->id == $shipzoneassign->zone_id ? " selected" : "") . ">" . $shipzones[$b]->description;
+    }
+
+    echo "</select>\n";
+    echo "($state[0]) $state[1]<br>\n";
+  }
+?>
+
+</font>
+</td>
+
+<td valign=top nowrap><?php echo FONT1 ?>
+<h4>United States</b><p>
+<font face="-1">
+
+<?php
+  $query = "SELECT * FROM shipping_zones";
+
+  if (!$sql_result = mysql_query($query, $sock)) {
+    echo mysql_error();
+    html_exit();
+  }
+
+  $shipzones = "";
+
+  for ($a = 0; $a < mysql_num_rows($sql_result); $a++) {
+    $shipzone = new ShippingZone(mysql_fetch_row($sql_result), 0);
+    $shipzones[] = $shipzone;
+  }
+
+  for ($a = 0; $a < count($STATES); $a++) {
+    $state = $STATES[$a];
+    $shipzoneassign = new ShippingZoneAssignment(0, $state[0]);
+
+    echo "<select name=\"$state[0]\"><option value=\"\"><font color=\"Red\"><b>None!</b></font>";
+
+    for ($b = 0; $b < count($shipzones); $b++) {
+      echo "<option value=\"" . $shipzones[$b]->id . "\"" . ($shipzones[$b]->id == $shipzoneassign->zone_id ? " selected" : "") . ">" . $shipzones[$b]->description;
+    }
+
+    echo "</select>\n";
+    echo "($state[0]) $state[1]<br>\n";
+  }
+?>
+
+</font>
+</td>
+</tr>
+</table>
+
+<p>
+
+<center><input type=reset value="          Reset          "> &nbsp;&nbsp; <input type=submit value="          Update          "></center>
+
+</form>
+
+<?php
+  html_tail();
+?>

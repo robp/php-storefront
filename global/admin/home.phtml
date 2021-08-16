@@ -1,0 +1,102 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  $sock = db_connect();
+  $config = new Config();
+
+  html_head();
+?>
+
+<b>Administrator Home</b> |
+<a href="news.phtml"><font color=Green>Recent Updates</font></a>
+
+<hr noshade size=1>
+
+<p>
+
+<b>Remember:</b> If you are using HTML caching (ON by default), changes to the Product, Category or Sale/Discount databases will not be reflected on <i>product.phtml</i> and <i>category.phtml</i> until you have <a href="index.phtml?s=config&f=clearcache.phtml" target="_top">cleared the HTML cache</a>, or automatically at midnight.<p>
+
+<ul>
+<li><a href="news.phtml">Click here for a list of Recent Updates</a>
+</ul>
+
+<p>
+
+<table width=80% border=0>
+<tr>
+<td width=50% valign=top>
+<?php echo FONT1 ?>
+
+<h3>Configuration</h3>
+
+<ul>
+<li><a href="index.phtml?s=config" target="_top">Store Configuration Wizard</a>
+<li><a href="index.phtml?s=config&f=clearcache.phtml" target="_top">Clear HTML Cache</a>
+</ul>
+
+<h3>Inventory</h3>
+
+<ul>
+<li><a href="index.phtml?s=inventory" target="_top">View Items</a>
+<li><a href="index.phtml?s=inventory&f=additem.phtml" target="_top">Add New Item</a>
+<li><a href="index.phtml?s=inventory&f=addoption.phtml" target="_top">Add Options To An Item</a>
+<li><a href="index.phtml?s=inventory&f=moditem.phtml" target="_top">Modify An Item</a>
+<li><a href="index.phtml?s=inventory&f=delitem.phtml" target="_top">Delete An Item</a>
+</ul>
+
+<h3>Categories</h3>
+
+<ul>
+<li><a href="index.phtml?s=categories" target="_top">View Categories</a>
+<li><a href="index.phtml?s=categories&f=addcat.phtml" target="_top">Add A Category</a>
+<li><a href="index.phtml?s=categories&f=delcat.phtml" target="_top">Delete A Category</a>
+</ul>
+</font>
+</td>
+
+<td width=10> <br></td>
+
+<td width=50% valign=top>
+<?php echo FONT1 ?>
+
+<h3>Shipping</h3>
+
+<ul>
+<li><a href="index.phtml?s=shipping" target="_top">Shipping Types</a>
+<li><a href="index.phtml?s=shipping&f=shipzones.phtml" target="_top">Shipping Zones</a>
+<li><a href="index.phtml?s=shipping&f=modshiplocs.phtml" target="_top">Zone Assignments</a>
+</ul>
+
+<h3>Sale Items</h3>
+
+<ul>
+<li><a href="index.phtml?s=sales" target="_top">Scale Codes</a>
+<li><a href="index.phtml?s=sales&f=disccodes.phtml" target="_top">Discount Codes</a>
+<li><a href="index.phtml?s=sales&f=discassign.phtml" target="_top">Discount Assignments</a>
+</ul>
+
+<h3>Transactions</h3>
+
+<ul>
+<li><a href="index.phtml?s=transactions" target="_top">View Transactions</a>
+<li><a href="index.phtml?s=transactions&f=viewreceipt.phtml" target="_top">View Receipts</a>
+</ul>
+
+<h3>Templates</h3>
+
+<ul>
+<li><a href="index.phtml?s=templates" target="_top">View Templates</a>
+<li><a href="index.phtml?s=templates&f=addtemplate.phtml" target="_top">Add A Template</a>
+<li><a href="index.phtml?s=templates&f=deltemplate.phtml" target="_top">Delete Templates</a>
+</td>
+</tr>
+</table>
+
+<?php
+  html_tail();
+?>

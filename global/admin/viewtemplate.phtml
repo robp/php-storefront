@@ -1,0 +1,66 @@
+<?php
+  // IMPORTANT NOTE: 
+  // When modifying this script, check to see if any changes here
+  // need to be replicated in the "additem.phtml" script b/c it
+  // shares a lot of code with this script.
+  //
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  html_head();
+
+  if ($id)
+    $template = new Template(0, $id);
+
+  if (!$template->id) {
+    $errmsg = "Invalid template id.";
+  }
+  else {
+    $tmpl_url = $config->template_url . $template->filename;
+
+    $file = fopen($tmpl_url, "r");
+    if (!$file) {
+      $errmsg = "Unable to open template file.";
+    }
+    else {
+      // Read the whole template file into $result
+      while (!feof($file)) {
+        $result .= fgets($file, 1024);
+      }
+
+      $result = nl2br(htmlentities($result));
+    }
+  }
+?>
+
+<b>View Templates</b> |
+<a href="addtemplate.phtml"><font color=Green>Add Templates</font></a>
+
+<hr noshade size=1>
+
+<p>
+
+<ul>
+<li><a href="deltemplate.phtml">Back to View Templates</a>
+</ul>
+
+<b><?php echo $errmsg ?></b><p>
+
+<?php
+  if ($result) {
+    echo "<b>File:</b> <a href=\"$tmpl_url\" target=\"_new\">$tmpl_url</a><p>\n";
+    echo $result;
+  }
+?>
+
+<?php
+  html_tail();
+?>

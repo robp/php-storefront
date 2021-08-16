@@ -1,0 +1,330 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  html_head();
+?>
+
+<b>View Items</b> |
+<a href="additem.phtml"><font color=Green>Add Items</font></a> |
+<a href="addoption.phtml"><font color=Green>Add Item Options</font></a> |
+<a href="moditem.phtml"><font color=Green>Modify Items</font></a> |
+<a href="delitem.phtml"><font color=Green>Delete Items</font></a>
+
+<hr noshade size=1>
+
+<p>
+
+<?php
+  if (!$sort)
+    $sort = "id";
+
+  if (!$order)
+    $order = "a";
+
+  $query = "SELECT sku FROM items ";
+
+  if ($c)
+    $category = new Category(0, $c);
+
+  if ($category->id)
+    $query .= "WHERE category = " . $category->id . " ";
+
+  $query .= "ORDER BY $sort";
+
+  if ($order == "d")
+    $query .= " DESC";
+
+  if ($sort != "id")
+    $query .= ", id";
+
+  if ($sort != "sku")
+    $query .= ", sku";
+
+            
+  if (!$sql_result = mysql_query($query, $sock)) {
+    echo mysql_error();
+    html_exit();
+  }
+
+  if (!$start)
+    $start = 1;
+
+  if (!$show)
+    $show = 25;
+
+  if ($category->id)
+    $show = 999999999;
+
+  $end = $start + $show - 1;
+
+  $num_rows = mysql_num_rows($sql_result);
+
+  if ($num_rows < $end)
+    $end = $num_rows;
+
+  if ($num_rows > 0)
+    mysql_data_seek($sql_result, $start - 1);
+
+  echo "There are " . $num_rows . " items in ";
+
+  if ($category->id)
+    echo "category " . $category->name . ". ";
+  else
+    echo "the database. ";
+  
+
+  if ($num_rows > 0 && !$category->id)
+    echo "Displaying items $start through $end.<p>\n\n";
+
+  if ($category->id)
+    echo "<a href=\"" . $PHP_SELF . "\">Show all database items.</a><p>\n\n";
+?>
+
+<form action="<?php echo $PHP_SELF ?>" method="get">
+Show <input type=text name="show" value="<?php echo $show ?>" size=4 maxlength=4> items per page. <input type=submit value="Refresh">
+</form>
+
+<p>
+
+Sale prices appear in <font color="Green">Green</font> below regular price.<p>
+
+<form action="invredir.phtml" method="post" target="_top">
+
+<input type=image border=0 name="addoption" src="../img/button-addoptions.gif">&nbsp;
+<input type=image border=0 name="moditem" src="../img/button-modify.gif">&nbsp;
+<input type=image border=0 name="delitem" src="../img/button-delete.gif">&nbsp;
+<input type=image border=0 name="adddiscount" src="../img/button-discount.gif">
+
+<p>
+
+<table border=0 width=490 cellpadding=0 cellspacing=0>
+<?php
+  echo "<tr><td>" . FONT1;
+  if ($start > 1) {
+    $new_start = $start - $show;
+    if ($new_start < 1) $new_start = 1;
+    echo "<a href=\"viewitems.phtml?start=$new_start&show=$show&sort=$sort&order=$order\">";
+    echo "<img border=0 src=\"../img/button-previous.gif\" alt=\"Previous Page\">";
+    echo "</a>";
+  }
+
+  echo "</font></td><td align=right>" . FONT1;
+
+  if ($num_rows > $end) {
+    $new_start = $end + 1;
+    echo "<a href=\"viewitems.phtml?start=$new_start&show=$show&sort=$sort&order=$order\">";
+    echo "<img border=0 src=\"../img/button-next.gif\" alt=\"Next Page\">";
+    echo "</a>";
+  }
+
+  echo "</font></td></tr>\n";
+  echo "</table>\n\n";
+
+  echo "<p>\n\n";
+
+  $script = "viewitems.phtml?start=$start&show=$show";
+?>
+
+
+<table border=2 cellspacing=0>
+<tr>
+<?php
+  echo "<td align=center nowrap>" . FONT1 . "<b>Select</b></font></td>\n";
+
+  echo "<td align=center nowrap>" . FONT1 . "<b><a href=\"$script&sort=id&order=";
+  if ($sort == "id" && $order == "a") echo "d";
+  else echo "a";
+  if ($category->id) echo "&c=" . $category->id;
+  echo "\">Prod. ID</a></b></font></td>\n";
+
+  echo "<td align=center nowrap>" . FONT1 . "<b><a href=\"$script&sort=category&order=";
+  if ($sort == "category" && $order == "a") echo "d";
+  else echo "a";
+  if ($category->id) echo "&c=" . $category->id;
+  echo "\">Category</a></b></font></td>\n";
+
+  echo "<td align=center nowrap>" . FONT1 . "<b><a href=\"$script&sort=sku&order=";
+  if ($sort == "sku" && $order == "a") echo "d";
+  else echo "a";
+  if ($category->id) echo "&c=" . $category->id;
+  echo "\">SKU</a></b></font></td>\n";
+
+  echo "<td align=center nowrap width=125>" . FONT1 . "<b><a href=\"$script&sort=name&order=";
+  if ($sort == "name" && $order == "a") echo "d";
+  else echo "a";
+  if ($category->id) echo "&c=" . $category->id;
+  echo "\">Name</a></b></font></td>\n";
+
+  echo "<td align=center nowrap>" . FONT1 . "<b><a href=\"$script&sort=price&order=";
+  if ($sort == "price" && $order == "a") echo "d";
+  else echo "a";
+  if ($category->id) echo "&c=" . $category->id;
+  echo "\">Price</a></b></font></td>\n";
+
+  echo "<td align=center nowrap>" . FONT1 . "<b><a href=\"$script&sort=pst&order=";
+  if ($sort == "pst" && $order == "a") echo "d";
+  else echo "a";
+  if ($category->id) echo "&c=" . $category->id;
+  echo "\">PST</a></b></font></td>\n";
+
+  echo "<td align=center nowrap>" . FONT1 . "<b><a href=\"$script&sort=gst&order=";
+  if ($sort == "gst" && $order == "a") echo "d";
+  else echo "a";
+  if ($category->id) echo "&c=" . $category->id;
+  echo "\">GST</a></b></font></td>\n";
+
+  echo "<td align=center nowrap>" . FONT1 . "<b><a href=\"$script&sort=weight&order=";
+  if ($sort == "weight" && $order == "a") echo "d";
+  else echo "a";
+  if ($category->id) echo "&c=" . $category->id;
+  echo "\">Weight</a></b></font></td>\n";
+
+  echo "<td align=center nowrap>" . FONT1 . "<b><a href=\"$script&sort=option1&order=";
+  if ($sort == "option1" && $order == "a") echo "d";
+  else echo "a";
+  if ($category->id) echo "&c=" . $category->id;
+  echo "\">Option 1</a></b></font></td>\n";
+
+  echo "<td align=center nowrap>" . FONT1 . "<b><a href=\"$script&sort=option2&order=";
+  if ($sort == "option2" && $order == "a") echo "d";
+  else echo "a";
+  if ($category->id) echo "&c=" . $category->id;
+  echo "\">Option 2</a></b></font></td>\n";
+
+  echo "<td align=center nowrap>" . FONT1 . "<b><a href=\"$script&sort=option3&order=";
+  if ($sort == "option3" && $order == "a") echo "d";
+  else echo "a";
+  if ($category->id) echo "&c=" . $category->id;
+  echo "\">Option 3</a></b></font></td>\n";
+
+  echo "<td align=center nowrap>" . FONT1 . "<b><a href=\"$script&sort=option4&order=";
+  if ($sort == "option4" && $order == "a") echo "d";
+  else echo "a";
+  if ($category->id) echo "&c=" . $category->id;
+  echo "\">Option 4</a></b></font></td>\n";
+
+  echo "<td align=center nowrap>" . FONT1 . "<b><a href=\"$script&sort=option5&order=";
+  if ($sort == "option5" && $order == "a") echo "d";
+  else echo "a";
+  if ($category->id) echo "&c=" . $category->id;
+  echo "\">Option 5</a></b></font></td>\n";
+
+  echo "<td align=center nowrap>" . FONT1 . "<b><a href=\"$script&sort=option6&order=";
+  if ($sort == "option6" && $order == "a") echo "d";
+  else echo "a";
+  if ($category->id) echo "&c=" . $category->id;
+  echo "\">Option 6</a></b></font></td>\n";
+
+  echo "<td align=center nowrap>" . FONT1 . "<b><a href=\"$script&sort=option7&order=";
+  if ($sort == "option7" && $order == "a") echo "d";
+  else echo "a";
+  if ($category->id) echo "&c=" . $category->id;
+  echo "\">Option 7</a></b></font></td>\n";
+
+  echo "<td align=center nowrap>" . FONT1 . "<b><a href=\"$script&sort=option8&order=";
+  if ($sort == "option8" && $order == "a") echo "d";
+  else echo "a";
+  if ($category->id) echo "&c=" . $category->id;
+  echo "\">Option 8</a></b></font></td>\n";
+
+  echo "<td align=center nowrap>" . FONT1 . "<b><a href=\"$script&sort=option9&order=";
+  if ($sort == "option9" && $order == "a") echo "d";
+  else echo "a";
+  if ($category->id) echo "&c=" . $category->id;
+  echo "\">Option 9</a></b></font></td>\n";
+
+  echo "<td align=center nowrap>" . FONT1 . "<b><a href=\"$script&sort=option10&order=";
+  if ($sort == "option10" && $order == "a") echo "d";
+  else echo "a";
+  if ($category->id) echo "&c=" . $category->id;
+  echo "\">Option 10</a></b></font></td>\n";
+?>
+</tr>
+
+<?php
+  for ($i = $start; $i <= $end; $i++) {
+    $sql_result_row = mysql_fetch_row($sql_result);
+    $item = new Item(0, $sql_result_row[0]);
+    $category = new Category(0, $item->category);
+    $sale_price = $item->get_sale_price();
+
+    printf("<tr>
+<td align=center valign=center><input type=checkbox name=\"sku[]\" value=\"%s\"></td>
+<td align=center><font size=-1><b><a href=\"moditemdyn.phtml?id=%s\">%s</a></b></td>
+<td align=center><font size=-1><a href=\"%s?c=%d\">%s</a></td>
+<td align=center><font size=-1>%s</td>
+<td><font size=-1>%s</td>
+<td align=right><font size=-1>\$%s%s</td>
+<td><font size=-1>%s</td>
+<td><font size=-1>%s</td>
+<td><font size=-1>%s %s</td>
+<td><font size=-1>%s</td>
+<td><font size=-1>%s</td>
+<td><font size=-1>%s</td>
+<td><font size=-1>%s</td>
+<td><font size=-1>%s</td>
+<td><font size=-1>%s</td>
+<td><font size=-1>%s</td>
+<td><font size=-1>%s</td>
+<td><font size=-1>%s</td>
+<td><font size=-1>%s</td></tr>\n",
+    urlencode($item->sku), $item->id, $item->id,
+    $PHP_SELF, $category->id, $category->name, $item->sku, $item->name,
+    format_money($item->price), ($sale_price != $item->price ? "<br><font color=\"Green\">\$" . format_money($sale_price) . "</font>" : ""), ($item->pst == "0" ? "No" : "Yes"),
+    ($item->gst == "0" ? "No" : "Yes"), $item->weight,
+    get_weight_by_id($item->weight_type), $item->option1, $item->option2,
+    $item->option3, $item->option4, $item->option5, $item->option6,
+    $item->option7, $item->option8, $item->option9, $item->option10);
+  }
+?>
+</table>
+
+<p>
+
+<?php
+  echo "<table border=0 width=490 cellpadding=0 cellspacing=0>";
+  echo "<tr><td>" . FONT1;
+  if ($start > 1) {
+    $new_start = $start - $show;
+    if ($new_start < 1) $new_start = 1;
+    echo "<a href=\"viewitems.phtml?start=$new_start&show=$show&sort=$sort\">";
+    echo "<img border=0 src=\"../img/button-previous.gif\" alt=\"Previous Page\">";
+    echo "</a>";
+  }
+
+  echo "</font></td><td align=right>" . FONT1;
+
+  if ($num_rows > $end) {
+    $new_start = $end + 1;
+    echo "<a href=\"viewitems.phtml?start=$new_start&show=$show&sort=$sort\">";
+    echo "<img border=0 src=\"../img/button-next.gif\" alt=\"Next Page\">";
+    echo "</a>";
+  }
+
+?>
+
+</font></td></tr>
+</table>
+
+<p>
+
+
+<input type=image border=0 name="addoption" src="../img/button-addoptions.gif">&nbsp;
+<input type=image border=0 name="moditem" src="../img/button-modify.gif">&nbsp;
+<input type=image border=0 name="delitem" src="../img/button-delete.gif">&nbsp;
+<input type=image border=0 name="adddiscount" src="../img/button-discount.gif">
+
+</form>
+
+<?php
+  html_tail();
+?>

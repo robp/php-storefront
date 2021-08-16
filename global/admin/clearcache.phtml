@@ -1,0 +1,48 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  if ($step) {
+    system("rm ../cache/cat*.html");
+    system("rm ../cache/prod*.html");
+    $errmsg = "HTML cache cleared.";
+  }
+
+  html_head();
+?>
+
+<b>Clear HTML Cache</b>
+
+<hr noshade size=1>
+
+<p>
+
+<?php if ($errmsg) echo "<b>$errmsg</b><p>\n\n"; ?>
+
+<p>
+
+<form action="<?php echo $PHP_SELF ?>" method="post">
+<input type=hidden name="step" value="1">
+
+The Merchant Server creates copies of dynamically generated category and product pages in a cache folder on the server. When these pages are cached, viewing them is much faster and less server-intensive than if they are created dynamically every time they are viewed.<p>
+
+Clearing the HTML cache will remove all of the cached files from the server cache folder. The cache files are recreated the next time a category or product page is viewed.<p>
+
+HTML cacheing is currently <b><?php echo (USE_CACHEING ? "on" : "off") ?></b>.<p>
+
+Are you sure you want to clear the cache?<p>
+
+<input type=submit value="          Clear Cache          ">
+</form>
+
+<?php
+  html_tail();
+?>

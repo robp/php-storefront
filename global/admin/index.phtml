@@ -1,0 +1,71 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  $sock = db_connect();
+  $config = new Config();
+  
+  if (!$s) $s = "home";
+
+  if ($s == "home") {
+    $title = "Home";
+    $h = "head.phtml?s=home";
+    if (!$f) $f = "home.phtml";
+  }
+  elseif ($s == "config") {
+    $title = "Configuration";
+    $h = "head.phtml?s=config";
+    if (!$f) $f = "config1.phtml";
+  }
+  elseif ($s == "inventory") {
+    $title = "Inventory";
+    $h = "head.phtml?s=inventory";
+    if (!$f) $f = "viewitems.phtml";
+  }
+  elseif ($s == "categories") {
+    $title = "Categories";
+    $h = "head.phtml?s=categories";
+    if (!$f) $f = "viewcats.phtml";
+  }
+  elseif ($s == "shipping") {
+    $title = "Shipping";
+    $h = "head.phtml?s=shipping";
+    if (!$f) $f = "shiptypes.phtml";
+  }
+  elseif ($s == "sales") {
+    $title = "Sale Items";
+    $h = "head.phtml?s=sales";
+    if (!$f) $f = "scalecodes.phtml";
+  }
+  elseif ($s == "transactions") {
+    $title = "Transactions";
+    $h = "head.phtml?s=transactions";
+    if (!$f) $f = "viewtrans.phtml";
+  }
+  elseif ($s == "templates") {
+    $title = "Templates";
+    $h = "head.phtml?s=templates";
+    if (!$f) $f = "deltemplate.phtml";
+  }
+?>
+
+<html>
+
+<head>
+<title><?php echo $config->store_name ?> Administrator: <?php echo $title ?></title>
+</head>
+
+<frameset rows="104, *" border=0 frameborder=0 framespacing=0>
+<frame src="<?php echo $h ?>" name="head" noresize border=0 frameborder=0 marginwidth=0 marginheight=0 scrolling=no>
+<frame src="<?php echo $f ?>" name="body" noresize border=0 frameborder=0 marginwidth=0 marginheight=0>
+
+<noframes>
+The Merchant Server Administrator requires a browser with HTML frames support.
+</noframes>
+</frameset>
+
+</html>

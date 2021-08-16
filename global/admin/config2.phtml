@@ -1,0 +1,193 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  // Setup which form inputs are required
+  $required1 = array("new_checkout_url", "new_viewbasket_url",
+                     "new_template_url", "new_link_basket_items",
+                     "new_shipping_origin", "new_tax_pst_rate",
+                     "new_tax_gst_rate", "new_shipping_model");
+
+  // Check to see that all required form inputs are found
+  if ($step) {
+    for ($i = 0; $i < sizeof($required1); $i++) {
+      if (!strlen($$required1[$i])) {
+        $missing_info = 1;
+        break;
+      }
+    }
+  }
+
+  if ($step && $missing_info)
+    $errmsg = "You didn't enter all the required information.";
+
+  if (!$step) {
+    $new_checkout_url = $config->checkout_url;
+    $new_viewbasket_url = $config->viewbasket_url;
+    $new_template_url = $config->template_url;
+    $new_link_basket_items = $config->link_basket_items;
+    $new_shipping_model = $config->shipping_model;
+    $new_shipping_origin = $config->shipping_origin;
+    $new_tax_pst_rate = $config->tax_pst_rate;
+    $new_tax_gst_rate = $config->tax_gst_rate;
+  }
+
+  if ($step && !$missing_info) {
+    $config->checkout_url = $new_checkout_url;
+    $config->viewbasket_url = $new_viewbasket_url;
+    $config->template_url = $new_template_url;
+    $config->link_basket_items = $new_link_basket_items;
+    $config->shipping_model = $new_shipping_model;
+    $config->shipping_origin = $new_shipping_origin;
+    $config->tax_pst_rate = $new_tax_pst_rate;
+    $config->tax_gst_rate = $new_tax_gst_rate;
+
+    $config->update();
+
+    header("Location: config3.phtml");
+    exit();
+  }
+
+  html_head();
+?>
+
+<b>Store Configuration Wizard - Step 2 of 4</b>
+
+<hr noshade size=1>
+
+<p>
+
+<b><?php echo $errmsg ?></b><p>
+
+<form action="<?php echo $PHP_SELF ?>" method="post">
+<input type=hidden name="step" value="1">
+
+<center>
+<a href="config1.phtml"><img border=0 src="../img/button-previous.gif" alt="Previous"></a> &nbsp; <a href="config2.phtml"><img border=0 src="../img/button-reset.gif" alt="Reset"></a> &nbsp; <input type=image border=0 src="../img/button-next.gif" alt="Next">
+</center>
+
+<p>
+
+<table border=0>
+
+<tr>
+<td><?php echo FONT1 ?>
+<b>Checkout URL</b>
+</font></td>
+<td>
+<input type=text name="new_checkout_url" value="<?php echo htmlspecialchars($new_checkout_url) ?>" size=40 maxlength=200>
+</td>
+</tr>
+
+<tr>
+<td><?php echo FONT1 ?>
+<b>View Basket URL</b>
+</font></td>
+<td>
+<input type=text name="new_viewbasket_url" value="<?php echo htmlspecialchars($new_viewbasket_url) ?>" size=40 maxlength=200>
+</td>
+</tr>
+
+<tr>
+<td><?php echo FONT1 ?>
+<b>Template URL</b>
+</font></td>
+<td>
+<input type=text name="new_template_url" value="<?php echo htmlspecialchars($new_template_url) ?>" size=40 maxlength=200>
+</td>
+<td><?php echo FONT1 ?>
+(must end with "/")
+</font></td>
+</tr>
+
+<tr><td><br></td></tr>
+
+<tr>
+<td><?php echo FONT1 ?>
+<b>Link Basket Items?</b>
+</font></td>
+<td><?php echo FONT1 ?>
+<input type=radio name="new_link_basket_items" value="1"<?php if ($new_link_basket_items == "1") echo " checked"; ?>> Yes
+&nbsp;&nbsp;
+<input type=radio name="new_link_basket_items" value="0"<?php if ($new_link_basket_items == "0") echo " checked"; ?>> No
+</font></td>
+</tr>
+
+<tr><td><br></td></tr>
+
+<tr>
+<td><?php echo FONT1 ?>
+<b>Shipping Model</b>
+</font></td>
+<td>
+<select name="new_shipping_model">
+<option value=""> &nbsp;
+<?php
+  for ($i = 0; $i < count($SHIPPING_MODELS); $i++) {
+    $model = $SHIPPING_MODELS[$i];
+    echo "<option value=\"" . $model[0] . "\"" . ($model[0] == $new_shipping_model ? " selected" : "") . ">" . $model[1];
+  }
+?>
+</select>
+</td>
+</tr>
+
+<tr>
+<td><?php echo FONT1 ?>
+<b>Shipping Origin</b>
+</font></td>
+<td>
+<select name="new_shipping_origin">
+<option value=""> &nbsp;
+<?php
+  for ($i = 0; $i < count($PROVINCES); $i++) {
+    $state = $PROVINCES[$i];
+    echo "<option value=\"" . $state[0] . "\"" . ($state[0] == $new_shipping_origin ? " selected" : "") . ">" . $state[0];
+  }
+  echo "<option value=\"\">--";
+  for ($i = 0; $i < count($STATES); $i++) {
+    $state = $STATES[$i];
+    echo "<option value=\"" . $state[0] . "\"" . ($state[0] == $new_shipping_origin ? " selected" : "") . ">" . $state[0];
+  }
+?>
+</select>
+</td>
+</tr>
+
+<tr>
+<td><?php echo FONT1 ?>
+<b>PST Rate</b>
+</font></td>
+<td>
+<input type=text name="new_tax_pst_rate" value="<?php echo htmlspecialchars($new_tax_pst_rate) ?>" size=10 maxlength=10>
+</td>
+</tr>
+
+<tr>
+<td><?php echo FONT1 ?>
+<b>GST Rate</b>
+</font></td>
+<td>
+<input type=text name="new_tax_gst_rate" value="<?php echo htmlspecialchars($new_tax_gst_rate) ?>" size=10 maxlength=10>
+</td>
+</tr>
+
+</table>
+
+<p>
+
+<center>
+<a href="config1.phtml"><img border=0 src="../img/button-previous.gif" alt="Previous"></a> &nbsp; <a href="config2.phtml"><img border=0 src="../img/button-reset.gif" alt="Reset"></a> &nbsp; <input type=image border=0 src="../img/button-next.gif" alt="Next">
+</center>
+
+<?php
+  html_tail();
+?>

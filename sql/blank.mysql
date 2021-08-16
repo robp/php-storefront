@@ -1,0 +1,709 @@
+# MySQL dump 6.4
+#
+# Host: localhost    Database: SHOPCART_wincomstore
+#--------------------------------------------------------
+# Server version	3.22.27
+
+USE mysql;
+
+CREATE DATABASE SHOPCART_%STOREID%;
+
+INSERT INTO db VALUES ('localhost', 'SHOPCART_%STOREID%', 'httpd', 'Y', 'Y', 'Y', 'Y', 'N', 'N', 'N', 'N', 'N', 'N');
+INSERT INTO db VALUES ('orion.wincom.net', 'SHOPCART_%STOREID%', 'httpd', 'Y', 'Y', 'Y', 'Y', 'N', 'N', 'N', 'N', 'N', 'N');
+
+FLUSH PRIVILEGES;
+
+
+USE SHOPCART_%STOREID%;
+
+#
+# Table structure for table 'bundle_items'
+#
+CREATE TABLE bundle_items (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  bundle_id int(11) DEFAULT '0' NOT NULL,
+  sku char(40) DEFAULT '' NOT NULL,
+  quantity int(11) DEFAULT '0' NOT NULL,
+  PRIMARY KEY (id),
+  KEY bundle_id (bundle_id)
+);
+
+#
+# Dumping data for table 'bundle_items'
+#
+
+#
+# Table structure for table 'bundles'
+#
+CREATE TABLE bundles (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  order_id int(11) DEFAULT '0' NOT NULL,
+  name char(80) DEFAULT '' NOT NULL,
+  quantity int(11) DEFAULT '0' NOT NULL,
+  PRIMARY KEY (id),
+  KEY order_id (order_id)
+);
+
+#
+# Dumping data for table 'bundles'
+#
+
+#
+# Table structure for table 'categories'
+#
+CREATE TABLE categories (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  parent_id int(11) DEFAULT '0' NOT NULL,
+  template_id int(11) DEFAULT '0' NOT NULL,
+  name varchar(80) DEFAULT '' NOT NULL,
+  desc_short varchar(255) DEFAULT '' NOT NULL,
+  desc_long1 text NOT NULL,
+  desc_long2 text NOT NULL,
+  img_small varchar(255) DEFAULT '' NOT NULL,
+  img_medium varchar(255) DEFAULT '' NOT NULL,
+  img_large varchar(255) DEFAULT '' NOT NULL,
+  PRIMARY KEY (id),
+  KEY parent_id (parent_id)
+);
+
+#
+# Dumping data for table 'categories'
+#
+
+#
+# Table structure for table 'config'
+#
+CREATE TABLE config (
+  store_name varchar(255) DEFAULT '' NOT NULL,
+  store_address_1 varchar(80) DEFAULT '' NOT NULL,
+  store_address_2 varchar(80) DEFAULT '' NOT NULL,
+  store_city varchar(80) DEFAULT '' NOT NULL,
+  store_state varchar(80) DEFAULT '' NOT NULL,
+  store_country varchar(80) DEFAULT '' NOT NULL,
+  store_zip varchar(80) DEFAULT '' NOT NULL,
+  store_phone varchar(80) DEFAULT '' NOT NULL,
+  store_fax varchar(80) DEFAULT '' NOT NULL,
+  store_url varchar(255) DEFAULT 'http://www.domain.com/' NOT NULL,
+  domain_name varchar(255) DEFAULT 'www.domain.com' NOT NULL,
+  billing_email varchar(255) DEFAULT 'orders@domain.com' NOT NULL,
+  shipping_origin char(2) DEFAULT '' NOT NULL,
+  checkout_url varchar(255) DEFAULT 'https://secure.domain.com/dyn/checkout.phtml' NOT NULL,
+  viewbasket_url varchar(255) DEFAULT 'http://www.domain.com/dyn/viewbasket.phtml' NOT NULL,
+  template_url varchar(255) DEFAULT 'http://www.domain.com/templates/' NOT NULL,
+  link_basket_items int(11) DEFAULT '1' NOT NULL,
+  tax_pst_rate double(16,2) DEFAULT '0.08' NOT NULL,
+  tax_gst_rate double(16,2) DEFAULT '0.07' NOT NULL,
+  cc_live int(11) DEFAULT '0' NOT NULL,
+  cc_terminal_id varchar(255) DEFAULT '' NOT NULL,
+  pgp_use int(11) DEFAULT '0' NOT NULL,
+  pgp_rcptkey_id varchar(255) DEFAULT '' NOT NULL,
+  email_sender_name varchar(255) DEFAULT 'Your Name' NOT NULL,
+  email_sender_address varchar(255) DEFAULT 'orders@domain.com' NOT NULL,
+  email_cust_header text NOT NULL,
+  email_cust_footer text NOT NULL,
+  shipping_model int(11) DEFAULT '1' NOT NULL
+);
+
+#
+# Dumping data for table 'config'
+#
+
+INSERT INTO config VALUES ('%STOREID%','','','','','','','','','','','','','','','',1,0.08,0.07,0,'',0,'','','','','',1);
+
+#
+# Table structure for table 'items'
+#
+CREATE TABLE items (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  category int(11) DEFAULT '0' NOT NULL,
+  sku char(40) DEFAULT '' NOT NULL,
+  name char(80) DEFAULT '' NOT NULL,
+  price double(16,2) DEFAULT '0.00' NOT NULL,
+  pst tinyint(4) DEFAULT '0' NOT NULL,
+  gst tinyint(4) DEFAULT '0' NOT NULL,
+  weight double(16,4) DEFAULT '0.0000' NOT NULL,
+  weight_type tinyint(4) DEFAULT '0' NOT NULL,
+  option1 char(40) DEFAULT '' NOT NULL,
+  option2 char(40) DEFAULT '' NOT NULL,
+  option3 char(40) DEFAULT '' NOT NULL,
+  option4 char(40) DEFAULT '' NOT NULL,
+  option5 char(40) DEFAULT '' NOT NULL,
+  option6 char(40) DEFAULT '' NOT NULL,
+  option7 char(40) DEFAULT '' NOT NULL,
+  option8 char(40) DEFAULT '' NOT NULL,
+  option9 char(40) DEFAULT '' NOT NULL,
+  option10 char(40) DEFAULT '' NOT NULL,
+  PRIMARY KEY (sku),
+  KEY sku (id)
+);
+
+#
+# Dumping data for table 'items'
+#
+
+#
+# Table structure for table 'items_dynamic'
+#
+CREATE TABLE items_dynamic (
+  id int(11) DEFAULT '0' NOT NULL,
+  template_id int(11) DEFAULT '0' NOT NULL,
+  name varchar(80) DEFAULT '' NOT NULL,
+  option1desc varchar(40) DEFAULT '' NOT NULL,
+  option2desc varchar(40) DEFAULT '' NOT NULL,
+  option3desc varchar(40) DEFAULT '' NOT NULL,
+  option4desc varchar(40) DEFAULT '' NOT NULL,
+  option5desc varchar(40) DEFAULT '' NOT NULL,
+  option6desc varchar(40) DEFAULT '' NOT NULL,
+  option7desc varchar(40) DEFAULT '' NOT NULL,
+  option8desc varchar(40) DEFAULT '' NOT NULL,
+  option9desc varchar(40) DEFAULT '' NOT NULL,
+  option10desc varchar(40) DEFAULT '' NOT NULL,
+  desc_short varchar(255) DEFAULT '' NOT NULL,
+  desc_long1 text NOT NULL,
+  desc_long2 text NOT NULL,
+  img_small varchar(255) DEFAULT '' NOT NULL,
+  img_medium varchar(255) DEFAULT '' NOT NULL,
+  img_large varchar(255) DEFAULT '' NOT NULL,
+  PRIMARY KEY (id)
+);
+
+#
+# Dumping data for table 'items_dynamic'
+#
+
+#
+# Table structure for table 'orders'
+#
+CREATE TABLE orders (
+  id int(11) DEFAULT '0' NOT NULL,
+  basket_id char(40) DEFAULT '' NOT NULL,
+  expiry int(11) DEFAULT '0' NOT NULL,
+  PRIMARY KEY (id),
+  KEY basket_id (basket_id(10))
+);
+
+#
+# Dumping data for table 'orders'
+#
+
+#
+# Table structure for table 'orders_id'
+#
+CREATE TABLE orders_id (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  PRIMARY KEY (id)
+);
+
+#
+# Dumping data for table 'orders_id'
+#
+
+#
+# Table structure for table 'receipts'
+#
+CREATE TABLE receipts (
+  id int(11) DEFAULT '0' NOT NULL,
+  uid int(11) DEFAULT '0' NOT NULL,
+  receipt text NOT NULL,
+  PRIMARY KEY (id),
+  KEY uid (uid)
+);
+
+#
+# Dumping data for table 'receipts'
+#
+
+
+#
+# Table structure for table 'shipping_price_threshold'
+#
+CREATE TABLE shipping_price_threshold (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  zone_id int(11) DEFAULT '0' NOT NULL,
+  type_id int(11) DEFAULT '0' NOT NULL,
+  threshold double(16,2) DEFAULT '0.00' NOT NULL,
+  cost double(16,2) DEFAULT '0.00' NOT NULL,
+  PRIMARY KEY (id)
+);
+
+#
+# Dumping data for table 'shipping_price_threshold'
+#
+
+
+#
+# Table structure for table 'shipping_quantity_threshold'
+#
+CREATE TABLE shipping_quantity_threshold (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  zone_id int(11) DEFAULT '0' NOT NULL,
+  type_id int(11) DEFAULT '0' NOT NULL,
+  threshold int(11) DEFAULT '0' NOT NULL,
+  cost double(16,2) DEFAULT '0.00' NOT NULL,
+  PRIMARY KEY (id)
+);
+
+#
+# Dumping data for table 'shipping_quantity_threshold'
+#
+
+
+#
+# Table structure for table 'shipping_type_assignments'
+#
+CREATE TABLE shipping_type_assignments (
+  type_id int(11) DEFAULT '0' NOT NULL,
+  zone_id int(11) DEFAULT '0' NOT NULL
+);
+
+#
+# Dumping data for table 'shipping_type_assignments'
+#
+
+INSERT INTO shipping_type_assignments VALUES (2,5);
+INSERT INTO shipping_type_assignments VALUES (1,3);
+INSERT INTO shipping_type_assignments VALUES (2,2);
+INSERT INTO shipping_type_assignments VALUES (1,5);
+INSERT INTO shipping_type_assignments VALUES (1,6);
+INSERT INTO shipping_type_assignments VALUES (1,7);
+INSERT INTO shipping_type_assignments VALUES (1,8);
+INSERT INTO shipping_type_assignments VALUES (1,9);
+INSERT INTO shipping_type_assignments VALUES (1,11);
+INSERT INTO shipping_type_assignments VALUES (2,10);
+INSERT INTO shipping_type_assignments VALUES (1,4);
+INSERT INTO shipping_type_assignments VALUES (1,2);
+INSERT INTO shipping_type_assignments VALUES (2,1);
+INSERT INTO shipping_type_assignments VALUES (1,1);
+INSERT INTO shipping_type_assignments VALUES (2,3);
+INSERT INTO shipping_type_assignments VALUES (2,6);
+INSERT INTO shipping_type_assignments VALUES (2,7);
+INSERT INTO shipping_type_assignments VALUES (2,8);
+INSERT INTO shipping_type_assignments VALUES (2,9);
+INSERT INTO shipping_type_assignments VALUES (1,10);
+INSERT INTO shipping_type_assignments VALUES (2,11);
+INSERT INTO shipping_type_assignments VALUES (1,12);
+INSERT INTO shipping_type_assignments VALUES (1,13);
+INSERT INTO shipping_type_assignments VALUES (1,14);
+
+#
+# Table structure for table 'shipping_types'
+#
+CREATE TABLE shipping_types (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  description char(255) DEFAULT '' NOT NULL,
+  PRIMARY KEY (id)
+);
+
+#
+# Dumping data for table 'shipping_types'
+#
+
+INSERT INTO shipping_types VALUES (1,'2-3 Day Standard Delivery');
+INSERT INTO shipping_types VALUES (2,'Next Day Air');
+
+#
+# Table structure for table 'shipping_weight_threshold'
+#
+CREATE TABLE shipping_weight_threshold (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  zone_id int(11) DEFAULT '0' NOT NULL,
+  type_id int(11) DEFAULT '0' NOT NULL,
+  threshold double(16,2) DEFAULT '0.00' NOT NULL,
+  cost double(16,2) DEFAULT '0.00' NOT NULL,
+  PRIMARY KEY (id)
+);
+
+#
+# Dumping data for table 'shipping_weight_threshold'
+#
+
+INSERT INTO shipping_weight_threshold VALUES (164,1,1,1.00,2.10);
+INSERT INTO shipping_weight_threshold VALUES (163,1,1,7.00,8.50);
+INSERT INTO shipping_weight_threshold VALUES (162,1,1,4.00,5.85);
+INSERT INTO shipping_weight_threshold VALUES (161,1,1,2.00,3.35);
+INSERT INTO shipping_weight_threshold VALUES (160,1,1,999999999.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (159,1,2,1.00,4.50);
+INSERT INTO shipping_weight_threshold VALUES (158,1,2,2.00,6.75);
+INSERT INTO shipping_weight_threshold VALUES (157,1,2,999999999.00,36.00);
+INSERT INTO shipping_weight_threshold VALUES (156,1,2,4.00,11.75);
+INSERT INTO shipping_weight_threshold VALUES (155,1,2,7.00,16.50);
+INSERT INTO shipping_weight_threshold VALUES (22,2,2,7.00,16.50);
+INSERT INTO shipping_weight_threshold VALUES (21,2,2,4.00,11.75);
+INSERT INTO shipping_weight_threshold VALUES (20,2,2,999999999.00,36.00);
+INSERT INTO shipping_weight_threshold VALUES (19,2,2,2.00,6.75);
+INSERT INTO shipping_weight_threshold VALUES (18,2,2,1.00,4.50);
+INSERT INTO shipping_weight_threshold VALUES (17,2,1,999999999.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (16,2,1,2.00,3.35);
+INSERT INTO shipping_weight_threshold VALUES (15,2,1,4.00,5.85);
+INSERT INTO shipping_weight_threshold VALUES (14,2,1,7.00,8.50);
+INSERT INTO shipping_weight_threshold VALUES (13,2,1,1.00,2.10);
+INSERT INTO shipping_weight_threshold VALUES (188,4,1,1.00,2.10);
+INSERT INTO shipping_weight_threshold VALUES (187,4,1,7.00,8.50);
+INSERT INTO shipping_weight_threshold VALUES (186,4,1,4.00,5.85);
+INSERT INTO shipping_weight_threshold VALUES (185,4,1,2.00,3.35);
+INSERT INTO shipping_weight_threshold VALUES (184,4,1,999999999.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (183,4,2,1.00,4.50);
+INSERT INTO shipping_weight_threshold VALUES (182,4,2,2.00,6.75);
+INSERT INTO shipping_weight_threshold VALUES (181,4,2,999999999.00,36.00);
+INSERT INTO shipping_weight_threshold VALUES (180,4,2,4.00,11.75);
+INSERT INTO shipping_weight_threshold VALUES (179,4,2,7.00,16.50);
+INSERT INTO shipping_weight_threshold VALUES (176,3,1,1.00,2.10);
+INSERT INTO shipping_weight_threshold VALUES (175,3,1,7.00,8.50);
+INSERT INTO shipping_weight_threshold VALUES (174,3,1,4.00,5.85);
+INSERT INTO shipping_weight_threshold VALUES (173,3,1,2.00,3.35);
+INSERT INTO shipping_weight_threshold VALUES (172,3,1,999999999.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (171,3,2,1.00,4.50);
+INSERT INTO shipping_weight_threshold VALUES (170,3,2,2.00,6.75);
+INSERT INTO shipping_weight_threshold VALUES (169,3,2,999999999.00,36.00);
+INSERT INTO shipping_weight_threshold VALUES (168,3,2,4.00,11.75);
+INSERT INTO shipping_weight_threshold VALUES (167,3,2,7.00,16.50);
+INSERT INTO shipping_weight_threshold VALUES (200,5,1,1.00,2.10);
+INSERT INTO shipping_weight_threshold VALUES (199,5,1,7.00,8.50);
+INSERT INTO shipping_weight_threshold VALUES (198,5,1,4.00,5.85);
+INSERT INTO shipping_weight_threshold VALUES (197,5,1,2.00,3.35);
+INSERT INTO shipping_weight_threshold VALUES (196,5,1,999999999.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (195,5,2,1.00,4.50);
+INSERT INTO shipping_weight_threshold VALUES (194,5,2,2.00,6.75);
+INSERT INTO shipping_weight_threshold VALUES (193,5,2,999999999.00,36.00);
+INSERT INTO shipping_weight_threshold VALUES (192,5,2,4.00,11.75);
+INSERT INTO shipping_weight_threshold VALUES (191,5,2,7.00,16.50);
+INSERT INTO shipping_weight_threshold VALUES (212,6,1,1.00,2.10);
+INSERT INTO shipping_weight_threshold VALUES (211,6,1,7.00,8.50);
+INSERT INTO shipping_weight_threshold VALUES (210,6,1,4.00,5.85);
+INSERT INTO shipping_weight_threshold VALUES (209,6,1,2.00,3.35);
+INSERT INTO shipping_weight_threshold VALUES (208,6,1,999999999.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (207,6,2,1.00,4.50);
+INSERT INTO shipping_weight_threshold VALUES (206,6,2,2.00,6.75);
+INSERT INTO shipping_weight_threshold VALUES (205,6,2,999999999.00,36.00);
+INSERT INTO shipping_weight_threshold VALUES (204,6,2,4.00,11.75);
+INSERT INTO shipping_weight_threshold VALUES (203,6,2,7.00,16.50);
+INSERT INTO shipping_weight_threshold VALUES (236,8,1,1.00,2.10);
+INSERT INTO shipping_weight_threshold VALUES (235,8,1,7.00,8.50);
+INSERT INTO shipping_weight_threshold VALUES (234,8,1,4.00,5.85);
+INSERT INTO shipping_weight_threshold VALUES (233,8,1,2.00,3.35);
+INSERT INTO shipping_weight_threshold VALUES (232,8,1,999999999.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (231,8,2,1.00,4.50);
+INSERT INTO shipping_weight_threshold VALUES (230,8,2,2.00,6.75);
+INSERT INTO shipping_weight_threshold VALUES (229,8,2,999999999.00,36.00);
+INSERT INTO shipping_weight_threshold VALUES (228,8,2,4.00,11.75);
+INSERT INTO shipping_weight_threshold VALUES (227,8,2,7.00,16.50);
+INSERT INTO shipping_weight_threshold VALUES (224,7,1,1.00,2.10);
+INSERT INTO shipping_weight_threshold VALUES (223,7,1,7.00,8.50);
+INSERT INTO shipping_weight_threshold VALUES (222,7,1,4.00,5.85);
+INSERT INTO shipping_weight_threshold VALUES (221,7,1,2.00,3.35);
+INSERT INTO shipping_weight_threshold VALUES (220,7,1,999999999.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (219,7,2,1.00,4.50);
+INSERT INTO shipping_weight_threshold VALUES (218,7,2,2.00,6.75);
+INSERT INTO shipping_weight_threshold VALUES (217,7,2,999999999.00,36.00);
+INSERT INTO shipping_weight_threshold VALUES (216,7,2,4.00,11.75);
+INSERT INTO shipping_weight_threshold VALUES (215,7,2,7.00,16.50);
+INSERT INTO shipping_weight_threshold VALUES (248,9,1,1.00,2.10);
+INSERT INTO shipping_weight_threshold VALUES (247,9,1,7.00,8.50);
+INSERT INTO shipping_weight_threshold VALUES (246,9,1,4.00,5.85);
+INSERT INTO shipping_weight_threshold VALUES (245,9,1,2.00,3.35);
+INSERT INTO shipping_weight_threshold VALUES (244,9,1,999999999.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (243,9,2,1.00,4.50);
+INSERT INTO shipping_weight_threshold VALUES (242,9,2,2.00,6.75);
+INSERT INTO shipping_weight_threshold VALUES (241,9,2,999999999.00,36.00);
+INSERT INTO shipping_weight_threshold VALUES (240,9,2,4.00,11.75);
+INSERT INTO shipping_weight_threshold VALUES (239,9,2,7.00,16.50);
+INSERT INTO shipping_weight_threshold VALUES (260,10,1,1.00,2.10);
+INSERT INTO shipping_weight_threshold VALUES (259,10,1,7.00,8.50);
+INSERT INTO shipping_weight_threshold VALUES (258,10,1,4.00,5.85);
+INSERT INTO shipping_weight_threshold VALUES (257,10,1,2.00,3.35);
+INSERT INTO shipping_weight_threshold VALUES (256,10,1,999999999.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (255,10,2,1.00,4.50);
+INSERT INTO shipping_weight_threshold VALUES (254,10,2,2.00,6.75);
+INSERT INTO shipping_weight_threshold VALUES (253,10,2,999999999.00,36.00);
+INSERT INTO shipping_weight_threshold VALUES (252,10,2,4.00,11.75);
+INSERT INTO shipping_weight_threshold VALUES (251,10,2,7.00,16.50);
+INSERT INTO shipping_weight_threshold VALUES (272,11,1,1.00,2.10);
+INSERT INTO shipping_weight_threshold VALUES (271,11,1,7.00,8.50);
+INSERT INTO shipping_weight_threshold VALUES (270,11,1,4.00,5.85);
+INSERT INTO shipping_weight_threshold VALUES (269,11,1,2.00,3.35);
+INSERT INTO shipping_weight_threshold VALUES (268,11,1,999999999.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (267,11,2,1.00,4.50);
+INSERT INTO shipping_weight_threshold VALUES (266,11,2,2.00,6.75);
+INSERT INTO shipping_weight_threshold VALUES (265,11,2,999999999.00,36.00);
+INSERT INTO shipping_weight_threshold VALUES (264,11,2,4.00,11.75);
+INSERT INTO shipping_weight_threshold VALUES (263,11,2,7.00,16.50);
+INSERT INTO shipping_weight_threshold VALUES (284,12,1,1.00,2.10);
+INSERT INTO shipping_weight_threshold VALUES (283,12,1,7.00,8.50);
+INSERT INTO shipping_weight_threshold VALUES (282,12,1,4.00,5.85);
+INSERT INTO shipping_weight_threshold VALUES (281,12,1,2.00,3.35);
+INSERT INTO shipping_weight_threshold VALUES (280,12,1,999999999.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (279,12,2,1.00,4.50);
+INSERT INTO shipping_weight_threshold VALUES (278,12,2,2.00,6.75);
+INSERT INTO shipping_weight_threshold VALUES (277,12,2,999999999.00,36.00);
+INSERT INTO shipping_weight_threshold VALUES (276,12,2,4.00,11.75);
+INSERT INTO shipping_weight_threshold VALUES (275,12,2,7.00,16.50);
+INSERT INTO shipping_weight_threshold VALUES (296,13,1,1.00,2.10);
+INSERT INTO shipping_weight_threshold VALUES (295,13,1,7.00,8.50);
+INSERT INTO shipping_weight_threshold VALUES (294,13,1,4.00,5.85);
+INSERT INTO shipping_weight_threshold VALUES (293,13,1,2.00,3.35);
+INSERT INTO shipping_weight_threshold VALUES (292,13,1,999999999.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (291,13,2,1.00,4.50);
+INSERT INTO shipping_weight_threshold VALUES (290,13,2,2.00,6.75);
+INSERT INTO shipping_weight_threshold VALUES (289,13,2,999999999.00,36.00);
+INSERT INTO shipping_weight_threshold VALUES (288,13,2,4.00,11.75);
+INSERT INTO shipping_weight_threshold VALUES (287,13,2,7.00,16.50);
+INSERT INTO shipping_weight_threshold VALUES (308,14,1,1.00,2.10);
+INSERT INTO shipping_weight_threshold VALUES (307,14,1,7.00,8.50);
+INSERT INTO shipping_weight_threshold VALUES (306,14,1,4.00,5.85);
+INSERT INTO shipping_weight_threshold VALUES (305,14,1,2.00,3.35);
+INSERT INTO shipping_weight_threshold VALUES (304,14,1,999999999.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (303,14,2,1.00,4.50);
+INSERT INTO shipping_weight_threshold VALUES (302,14,2,2.00,6.75);
+INSERT INTO shipping_weight_threshold VALUES (301,14,2,999999999.00,36.00);
+INSERT INTO shipping_weight_threshold VALUES (300,14,2,4.00,11.75);
+INSERT INTO shipping_weight_threshold VALUES (299,14,2,7.00,16.50);
+INSERT INTO shipping_weight_threshold VALUES (154,2,2,15.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (153,2,1,15.00,14.80);
+INSERT INTO shipping_weight_threshold VALUES (165,1,2,15.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (166,1,1,15.00,14.80);
+INSERT INTO shipping_weight_threshold VALUES (177,3,2,15.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (178,3,1,15.00,14.80);
+INSERT INTO shipping_weight_threshold VALUES (189,4,2,15.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (190,4,1,15.00,14.80);
+INSERT INTO shipping_weight_threshold VALUES (201,5,2,15.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (202,5,1,15.00,14.80);
+INSERT INTO shipping_weight_threshold VALUES (213,6,2,15.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (214,6,1,15.00,14.80);
+INSERT INTO shipping_weight_threshold VALUES (225,7,2,15.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (226,7,1,15.00,14.80);
+INSERT INTO shipping_weight_threshold VALUES (237,8,2,15.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (238,8,1,15.00,14.80);
+INSERT INTO shipping_weight_threshold VALUES (249,9,2,15.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (250,9,1,15.00,14.80);
+INSERT INTO shipping_weight_threshold VALUES (261,10,2,15.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (262,10,1,15.00,14.80);
+INSERT INTO shipping_weight_threshold VALUES (273,11,2,15.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (274,11,1,15.00,14.80);
+INSERT INTO shipping_weight_threshold VALUES (285,12,2,15.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (286,12,1,15.00,14.80);
+INSERT INTO shipping_weight_threshold VALUES (297,13,2,15.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (298,13,1,15.00,14.80);
+INSERT INTO shipping_weight_threshold VALUES (309,14,2,15.00,24.00);
+INSERT INTO shipping_weight_threshold VALUES (310,14,1,15.00,14.80);
+
+#
+# Table structure for table 'shipping_zone_assignments'
+#
+CREATE TABLE shipping_zone_assignments (
+  zone_id int(11) DEFAULT '0' NOT NULL,
+  state char(2) DEFAULT '' NOT NULL
+);
+
+#
+# Dumping data for table 'shipping_zone_assignments'
+#
+
+INSERT INTO shipping_zone_assignments VALUES (1,'AB');
+INSERT INTO shipping_zone_assignments VALUES (1,'BC');
+INSERT INTO shipping_zone_assignments VALUES (2,'MB');
+INSERT INTO shipping_zone_assignments VALUES (3,'NB');
+INSERT INTO shipping_zone_assignments VALUES (3,'NF');
+INSERT INTO shipping_zone_assignments VALUES (4,'NT');
+INSERT INTO shipping_zone_assignments VALUES (3,'NS');
+INSERT INTO shipping_zone_assignments VALUES (4,'NU');
+INSERT INTO shipping_zone_assignments VALUES (2,'ON');
+INSERT INTO shipping_zone_assignments VALUES (3,'PE');
+INSERT INTO shipping_zone_assignments VALUES (3,'QC');
+INSERT INTO shipping_zone_assignments VALUES (1,'SK');
+INSERT INTO shipping_zone_assignments VALUES (4,'YK');
+INSERT INTO shipping_zone_assignments VALUES (9,'AL');
+INSERT INTO shipping_zone_assignments VALUES (12,'AK');
+INSERT INTO shipping_zone_assignments VALUES (6,'AZ');
+INSERT INTO shipping_zone_assignments VALUES (8,'AR');
+INSERT INTO shipping_zone_assignments VALUES (6,'CA');
+INSERT INTO shipping_zone_assignments VALUES (8,'CO');
+INSERT INTO shipping_zone_assignments VALUES (11,'CT');
+INSERT INTO shipping_zone_assignments VALUES (11,'DE');
+INSERT INTO shipping_zone_assignments VALUES (9,'FL');
+INSERT INTO shipping_zone_assignments VALUES (9,'GA');
+INSERT INTO shipping_zone_assignments VALUES (14,'GU');
+INSERT INTO shipping_zone_assignments VALUES (13,'HI');
+INSERT INTO shipping_zone_assignments VALUES (5,'ID');
+INSERT INTO shipping_zone_assignments VALUES (10,'IL');
+INSERT INTO shipping_zone_assignments VALUES (10,'IN');
+INSERT INTO shipping_zone_assignments VALUES (7,'IA');
+INSERT INTO shipping_zone_assignments VALUES (8,'KS');
+INSERT INTO shipping_zone_assignments VALUES (10,'KY');
+INSERT INTO shipping_zone_assignments VALUES (8,'LA');
+INSERT INTO shipping_zone_assignments VALUES (11,'ME');
+INSERT INTO shipping_zone_assignments VALUES (14,'MP');
+INSERT INTO shipping_zone_assignments VALUES (11,'MD');
+INSERT INTO shipping_zone_assignments VALUES (11,'MA');
+INSERT INTO shipping_zone_assignments VALUES (10,'MI');
+INSERT INTO shipping_zone_assignments VALUES (7,'MN');
+INSERT INTO shipping_zone_assignments VALUES (9,'MS');
+INSERT INTO shipping_zone_assignments VALUES (8,'MO');
+INSERT INTO shipping_zone_assignments VALUES (5,'MT');
+INSERT INTO shipping_zone_assignments VALUES (7,'NE');
+INSERT INTO shipping_zone_assignments VALUES (6,'NV');
+INSERT INTO shipping_zone_assignments VALUES (11,'NH');
+INSERT INTO shipping_zone_assignments VALUES (11,'NJ');
+INSERT INTO shipping_zone_assignments VALUES (8,'NM');
+INSERT INTO shipping_zone_assignments VALUES (11,'NY');
+INSERT INTO shipping_zone_assignments VALUES (9,'NC');
+INSERT INTO shipping_zone_assignments VALUES (7,'ND');
+INSERT INTO shipping_zone_assignments VALUES (10,'OH');
+INSERT INTO shipping_zone_assignments VALUES (8,'OK');
+INSERT INTO shipping_zone_assignments VALUES (5,'OR');
+INSERT INTO shipping_zone_assignments VALUES (11,'PA');
+INSERT INTO shipping_zone_assignments VALUES (14,'PR');
+INSERT INTO shipping_zone_assignments VALUES (11,'RI');
+INSERT INTO shipping_zone_assignments VALUES (9,'SC');
+INSERT INTO shipping_zone_assignments VALUES (7,'SD');
+INSERT INTO shipping_zone_assignments VALUES (9,'TN');
+INSERT INTO shipping_zone_assignments VALUES (8,'TX');
+INSERT INTO shipping_zone_assignments VALUES (6,'UT');
+INSERT INTO shipping_zone_assignments VALUES (14,'VI');
+INSERT INTO shipping_zone_assignments VALUES (11,'VT');
+INSERT INTO shipping_zone_assignments VALUES (11,'VA');
+INSERT INTO shipping_zone_assignments VALUES (11,'WA');
+INSERT INTO shipping_zone_assignments VALUES (11,'DC');
+INSERT INTO shipping_zone_assignments VALUES (10,'WV');
+INSERT INTO shipping_zone_assignments VALUES (10,'WI');
+INSERT INTO shipping_zone_assignments VALUES (5,'WY');
+
+#
+# Table structure for table 'shipping_zones'
+#
+CREATE TABLE shipping_zones (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  description char(255) DEFAULT '' NOT NULL,
+  tax tinyint(4) DEFAULT '0' NOT NULL,
+  tax_rate double(16,2) DEFAULT '0.00' NOT NULL,
+  PRIMARY KEY (id)
+);
+
+#
+# Dumping data for table 'shipping_zones'
+#
+
+INSERT INTO shipping_zones VALUES (1,'Canada West',0,0.00);
+INSERT INTO shipping_zones VALUES (2,'Canada Central',0,0.00);
+INSERT INTO shipping_zones VALUES (3,'Canada East',0,0.00);
+INSERT INTO shipping_zones VALUES (4,'Canada North',0,0.00);
+INSERT INTO shipping_zones VALUES (5,'US Northwest',0,0.00);
+INSERT INTO shipping_zones VALUES (6,'US Southwest',0,0.00);
+INSERT INTO shipping_zones VALUES (7,'US North',0,0.00);
+INSERT INTO shipping_zones VALUES (8,'US South',0,0.00);
+INSERT INTO shipping_zones VALUES (9,'US Southeast',0,0.00);
+INSERT INTO shipping_zones VALUES (10,'US Midwest',0,0.00);
+INSERT INTO shipping_zones VALUES (11,'US East',0,0.00);
+INSERT INTO shipping_zones VALUES (12,'US Alaska',0,0.00);
+INSERT INTO shipping_zones VALUES (13,'US Hawaii',0,0.00);
+INSERT INTO shipping_zones VALUES (14,'US Caribbean',0,0.00);
+
+#
+# Table structure for table 'templates'
+#
+CREATE TABLE templates (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  type int(11) DEFAULT '0' NOT NULL,
+  filename char(255) DEFAULT '' NOT NULL,
+  description char(255) DEFAULT '' NOT NULL,
+  PRIMARY KEY (id)
+);
+
+#
+# Dumping data for table 'templates'
+#
+
+#
+# Table structure for table 'transactions'
+#
+CREATE TABLE transactions (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  timestamp int(11) DEFAULT '0' NOT NULL,
+  refno char(10) DEFAULT '' NOT NULL,
+  authno char(10),
+  pridisplay char(40),
+  result char(10),
+  PRIMARY KEY (id)
+);
+
+#
+# Dumping data for table 'transactions'
+#
+
+
+#
+# Table structure for table 'scale_codes'
+#
+CREATE TABLE scale_codes (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  description char(255) DEFAULT '' NOT NULL,
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE scale_ranges (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  code_id int(11) DEFAULT '0' NOT NULL,
+  threshold double(16,2) DEFAULT '0.00' NOT NULL,
+  value double(16,2) DEFAULT '0.00' NOT NULL,
+  type int(11) DEFAULT '0' NOT NULL,
+  PRIMARY KEY (id),
+  KEY code_id (code_id)
+);
+
+CREATE TABLE discount_codes (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  description char(255) DEFAULT '' NOT NULL,
+  start_time int(11) DEFAULT '0' NOT NULL,
+  end_time int(11) DEFAULT '0' NOT NULL,
+  units int(11) DEFAULT '0' NOT NULL,
+  code_id int(11) DEFAULT '0' NOT NULL,
+  PRIMARY KEY (id),
+  KEY code_id (code_id)
+);
+
+CREATE TABLE discount_assignments (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  code_id int(11) DEFAULT '0' NOT NULL,
+  sku varchar(40) DEFAULT '' NOT NULL,
+  PRIMARY KEY (id),
+  KEY code_id (code_id)
+);
+
+CREATE TABLE users (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  gid int(11) DEFAULT '0' NOT NULL,
+  username char(20) DEFAULT '' NOT NULL,
+  password char(13) DEFAULT '*' NOT NULL,
+  PRIMARY KEY(id),
+  KEY gid (gid),
+  KEY username (username)
+);
+
+CREATE TABLE addressbook (
+  id int(11) DEFAULT '0' NOT NULL auto_increment,
+  uid int(11) DEFAULT '0' NOT NULL,
+  description char(40) DEFAULT '' NOT NULL,
+  title char(10) DEFAULT '' NOT NULL,
+  fname char(40) DEFAULT '' NOT NULL,
+  mname char(40) DEFAULT '' NOT NULL,
+  lname char(40) DEFAULT '' NOT NULL,
+  company char(80) DEFAULT '' NOT NULL,
+  address1 char(40) DEFAULT '' NOT NULL,
+  address2 char(40) DEFAULT '' NOT NULL,
+  address3 char(40) DEFAULT '' NOT NULL,
+  city char(40) DEFAULT '' NOT NULL,
+  state char(40) DEFAULT '' NOT NULL,
+  country char(40) DEFAULT '' NOT NULL,
+  zipcode char(20) DEFAULT '' NOT NULL,
+  phone1 char(40) DEFAULT '' NOT NULL,
+  phone2 char(40) DEFAULT '' NOT NULL,
+  phone3 char(40) DEFAULT '' NOT NULL,
+  email char(80) DEFAULT '' NOT NULL,
+  url char(255) DEFAULT '' NOT NULL,
+  age int(11) DEFAULT '0' NOT NULL,
+  gender char(1) DEFAULT '' NOT NULL,
+  marital char(1) DEFAULT '' NOT NULL,
+  notify tinyint(4) DEFAULT '0' NOT NULL,
+  PRIMARY KEY (id),
+  KEY uid (uid)
+);
+

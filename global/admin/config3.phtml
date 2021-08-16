@@ -1,0 +1,136 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  // Setup which form inputs are required
+  $required1 = array("new_billing_email", "new_email_sender_name",
+                     "new_pgp_use", "new_email_sender_address");
+
+  // Check to see that all required form inputs are found
+  if ($step) {
+    for ($i = 0; $i < sizeof($required1); $i++) {
+      if (!strlen($$required1[$i])) {
+        $missing_info = 1;
+        break;
+      }
+    }
+  }
+
+  if ($step && $missing_info)
+    $errmsg = "You didn't enter all the required information.";
+
+  if (!$step) {
+    $new_billing_email = $config->billing_email;
+    $new_pgp_use = $config->pgp_use;
+    $new_email_sender_name = $config->email_sender_name;
+    $new_email_sender_address = $config->email_sender_address;
+    $new_email_cust_header = $config->email_cust_header;
+    $new_email_cust_footer = $config->email_cust_footer;
+  }
+
+  if ($step && !$missing_info) {
+    $config->billing_email = $new_billing_email;
+    $config->pgp_use = $new_pgp_use;
+    $config->email_sender_name = $new_email_sender_name;
+    $config->email_sender_address = $new_email_sender_address;
+    $config->email_cust_header = $new_email_cust_header;
+    $config->email_cust_footer = $new_email_cust_footer;
+
+    $config->update();
+
+    header("Location: config4.phtml");
+    exit();
+  }
+
+  html_head();
+?>
+
+<b>Store Configuration Wizard - Step 3 of 4</b>
+
+<hr noshade size=1>
+
+<p>
+
+<b><?php echo $errmsg ?></b><p>
+
+<form action="<?php echo $PHP_SELF ?>" method="post">
+<input type=hidden name="step" value="1">
+
+<center>
+<a href="config2.phtml"><img border=0 src="../img/button-previous.gif" alt="Previous"></a> &nbsp; <a href="config3.phtml"><img border=0 src="../img/button-reset.gif" alt="Reset"></a> &nbsp; <input type=image border=0 src="../img/button-next.gif" alt="Next">
+</center>
+
+<p>
+
+<table border=0>
+
+<tr>
+<td><?php echo FONT1 ?>
+<b>Email Orders To</b>
+</font></td>
+<td>
+<input type=text name="new_billing_email" value="<?php echo htmlspecialchars($new_billing_email) ?>" size=40 maxlength=200>
+</td>
+</tr>
+
+<tr>
+<td><?php echo FONT1 ?>
+<b>PGP Encrypt Orders?</b>
+</font></td>
+<td><?php echo FONT1 ?>
+<input type=radio name="new_pgp_use" value="1"<?php if ($new_pgp_use == "1") echo " checked"; ?>> Yes
+&nbsp;&nbsp;
+<input type=radio name="new_pgp_use" value="0"<?php if ($new_pgp_use == "0") echo " checked"; ?>> No
+</font></td>
+</tr>
+
+<tr>
+<td><?php echo FONT1 ?>
+<b>Receipt Sender Name</b>
+</font></td>
+<td>
+<input type=text name="new_email_sender_name" value="<?php echo htmlspecialchars($new_email_sender_name) ?>" size=40 maxlength=200>
+</td>
+</tr>
+
+<tr>
+<td><?php echo FONT1 ?>
+<b>Receipt Sender Email</b>
+</font></td>
+<td>
+<input type=text name="new_email_sender_address" value="<?php echo htmlspecialchars($new_email_sender_address) ?>" size=40 maxlength=200>
+</td>
+</tr>
+</table>
+
+<p>
+
+Email Header Text<br>
+</font>
+<textarea name="new_email_cust_header" rows=6 cols=60><?php echo $new_email_cust_header ?></textarea>
+<?php echo FONT1 ?>
+
+<p>
+
+Email Footer Text<br>
+</font>
+<textarea name="new_email_cust_footer" rows=6 cols=60><?php echo $new_email_cust_footer ?></textarea>
+<?php echo FONT1 ?>
+
+<p>
+
+<center>
+<a href="config2.phtml"><img border=0 src="../img/button-previous.gif" alt="Previous"></a> &nbsp; <a href="config3.phtml"><img border=0 src="../img/button-reset.gif" alt="Reset"></a> &nbsp; <input type=image border=0 src="../img/button-next.gif" alt="Next">
+</center>
+
+<?php
+  html_tail();
+?>

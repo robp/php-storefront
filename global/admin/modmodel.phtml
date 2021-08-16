@@ -1,0 +1,235 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  for ($a = 0; $a < count($SHIPPING_MODELS); $a++) {
+    if ($SHIPPING_MODELS[$a][0] == $config->shipping_model)
+      $shipmodel = $SHIPPING_MODELS[$a];
+  }
+
+  if ($zone_id)
+    $shipzone = new ShippingZone(0, $zone_id);
+
+  if ($type_id)
+    $shiptype = new ShippingType(0, $type_id);
+
+  if (!$shipzone->id || !$shiptype->id) {
+    echo "Invalid zone or type id.";
+    exit();
+  }
+
+  if ($step) {
+    if ($config->shipping_model == 0)
+      $query = "SELECT * FROM shipping_price_threshold ";
+    elseif ($config->shipping_model == 1)
+      $query = "SELECT * FROM shipping_weight_threshold ";
+    elseif ($config->shipping_model == 2)
+      $query = "SELECT * FROM shipping_quantity_threshold ";
+
+    $query .= "WHERE zone_id = $shipzone->id
+               AND type_id = $shiptype->id
+               ORDER BY threshold, cost";
+
+    if (!$sql_result = mysql_query($query, $sock)) {
+      echo mysql_error();
+      html_exit();
+    }
+
+    for ($a = 0; $a < mysql_num_rows($sql_result); $a++) {
+      if ($config->shipping_model == 0)
+        $item = new ShippingPriceThreshold(mysql_fetch_row($sql_result), 0);
+      elseif ($config->shipping_model == 1)
+        $item = new ShippingWeightThreshold(mysql_fetch_row($sql_result), 0);
+      elseif ($config->shipping_model == 2)
+        $item = new ShippingQuantityThreshold(mysql_fetch_row($sql_result), 0);
+
+
+      $thresh_var = $item->id . "-threshold";
+      $cost_var = $item->id . "-cost";
+
+      if ($$thresh_var && $$cost_var) {
+        if ($$thresh_var == "max")
+          $item->threshold = 999999999;
+        else
+          $item->threshold = ($$thresh_var > 999999999 ? 
+                                             999999999 : $$thresh_var);
+
+        $item->cost = $$cost_var;
+        $item->update();
+      }
+    }
+  }
+
+  if ($step && $delete && is_array($delete)) {
+    for ($a = 0; $a < count($delete); $a++) {
+      if ($config->shipping_model == 0)
+        $item = new ShippingPriceThreshold(0, $delete[$a]);
+      elseif ($config->shipping_model == 1)
+        $item = new ShippingWeightThreshold(0, $delete[$a]);
+      elseif ($config->shipping_model == 2)
+        $item = new ShippingQuantityThreshold(0, $delete[$a]);
+
+      $item->delete();
+    }
+  }
+
+  if ($step && $new_threshold && strlen($new_cost)) {
+    if ($config->shipping_model == 0)
+      $newitem = new ShippingPriceThreshold();
+    elseif ($config->shipping_model == 1)
+      $newitem = new ShippingWeightThreshold();
+    elseif ($config->shipping_model == 2)
+      $newitem = new ShippingQuantityThreshold();
+
+    $newitem->zone_id = $shipzone->id;
+    $newitem->type_id = $shiptype->id;
+    $newitem->type_id = $shiptype->id;
+
+    if ($new_threshold == "max")
+      $newitem->threshold = 999999999;
+    else
+      $newitem->threshold = $new_threshold;
+
+    $newitem->cost = $new_cost;
+    $newitem->insert();
+
+    $errmsg = "Shipping zone adjusted.";
+  }
+
+  if ($config->shipping_model == 0)
+    $query = "SELECT * FROM shipping_price_threshold ";
+  elseif ($config->shipping_model == 1)
+    $query = "SELECT * FROM shipping_weight_threshold ";
+  elseif ($config->shipping_model == 2)
+    $query = "SELECT * FROM shipping_quantity_threshold ";
+
+  $query .= "WHERE zone_id = $shipzone->id
+             AND type_id = $shiptype->id
+             ORDER BY threshold";
+
+  if (!$sql_result = mysql_query($query, $sock)) {
+    echo mysql_error();
+    html_exit();
+  }
+
+  for ($a = 0; $a < mysql_num_rows($sql_result); $a++) {
+    if ($config->shipping_model == 0)
+      $item = new ShippingPriceThreshold(mysql_fetch_row($sql_result));
+    elseif ($config->shipping_model == 1)
+      $item = new ShippingWeightThreshold(mysql_fetch_row($sql_result));
+    elseif ($config->shipping_model == 2)
+      $item = new ShippingQuantityThreshold(mysql_fetch_row($sql_result));
+
+    $thresholds[] = $item;
+  }
+
+/*
+    // Delete the old type assignments for this zone, 
+    // then add the new ones
+    $query = "DELETE FROM shipping_type_assignments
+              WHERE zone_id = $shipzone->id";
+
+    if (!$sql_result = mysql_query($query, $sock)) {
+      echo mysql_error();
+      html_exit();
+    }
+
+    // add the new shipping type assignments to the zone
+    for ($a = 0; $a < count($new_ship_types); $a++) {
+      $shiptypeassign = new ShippingTypeAssignment();
+      $shiptypeassign->type_id = $new_ship_types[$a];
+      $shiptypeassign->zone_id = $shipzone->id;
+      $shiptypeassign->insert();
+    }
+
+    $errmsg = "Shipping Zone updated.";
+  }
+*/
+
+  html_head();
+?>
+
+<a href="shiptypes.phtml"><font color=Green>Shipping Types</font></a> |
+<b>Shipping Zones</b> |
+<a href="modshiplocs.phtml"><font color=Green>Zone Assignments</font></a>
+
+<hr noshade size=1>
+
+<p>
+
+<?php if ($errmsg) echo "<b>$errmsg</b><p>\n\n"; ?>
+
+<ul>
+<li><a href="viewzone.phtml?id=<?php echo $shipzone->id ?>">Back to <?php echo $shipzone->description ?></a>
+</ul>
+
+<p>
+
+<h3><?php echo $shipzone->description . " - " . $shiptype->description ?></h3>
+
+<form action="<?php echo $PHP_SELF ?>" method="post">
+<input type=hidden name="zone_id" value="<?php echo $shipzone->id ?>">
+<input type=hidden name="type_id" value="<?php echo $shiptype->id ?>">
+<input type=hidden name="step" value="1">
+
+
+<table border=2 cellpadding=4 cellspacing=0 width=400>
+<tr>
+<td colspan=3><?php echo FONT1 ?>
+<br>
+<center><h4><?php echo $shipmodel[1] ?> Model</h4></center>
+<blockquote>
+Adjust your shipping thresholds and costs for this zone below. The Threshold value is the <b>maximum</b> value for which a particular cost will apply. Use a threshold of <b>max</b> to specify a maximum value.
+<p>
+</blockquote>
+<center><input type=reset value="     Reset     "> &nbsp;&nbsp; <input type=submit value="Update Zone"></center>
+<br>
+</font></td>
+</tr>
+
+<tr>
+<td align=center><?php echo FONT1 ?>
+<b>Delete</b>
+</td>
+<td align=center width=50%><?php echo FONT1 ?>
+<b>Threshold</b>
+</td>
+<td align=center width=50%><?php echo FONT1 ?>
+<b>Cost</b>
+</td>
+</tr>
+
+<?php
+  for ($a = 0; $a < count($thresholds); $a++) {
+    printf("<tr><td align=center valign=center><input type=checkbox name=\"delete[]\" value=\"%d\"></td><td align=center><input type=text name=\"%d-threshold\" size=10 maxlength=10 value=\"%s\"></td><td align=center><input type=text name=\"%d-cost\" size=10 maxlength=10 value=\"%.2f\"></td></tr>\n",
+      $thresholds[$a]->id, $thresholds[$a]->id, (($thresholds[$a]->threshold == 999999999) ? "max" : $thresholds[$a]->threshold), $thresholds[$a]->id, $thresholds[$a]->cost);
+  }
+?>
+
+<tr>
+<td>&nbsp;</td>
+<td align=center>
+<?php echo FONT1 ?>New Value</font><br>
+<input type=text name="new_threshold" size=10 maxlength=10>
+</td>
+<td align=center>
+<?php echo FONT1 ?>New Value</font><br>
+<input type=text name="new_cost" size=10 maxlength=10>
+</td>
+</tr>
+
+</table>
+
+</form>
+
+<?php
+  html_tail();
+?>

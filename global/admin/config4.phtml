@@ -1,0 +1,104 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  // Setup which form inputs are required
+  $required1 = array("new_cc_live");
+  $required2 = array("new_cc_terminal_id");
+
+  // Check to see that all required form inputs are found
+  if ($step) {
+    for ($i = 0; $i < sizeof($required1); $i++) {
+      if (!strlen($$required1[$i])) {
+        $missing_info = 1;
+        break;
+      }
+    }
+  }
+
+  if ($step && $new_cc_live == "1") {
+    for ($i = 0; $i < sizeof($required2); $i++) {
+      if (!strlen($$required2[$i])) {
+        $missing_info = 1;
+        break;
+      }
+    }
+  }
+
+  if ($step && $missing_info)
+    $errmsg = "You didn't enter all the required information.";
+
+  if (!$step) {
+    $new_cc_terminal_id = $config->cc_terminal_id;
+    $new_cc_live = $config->cc_live;
+  }
+
+  if ($step && !$missing_info) {
+    $config->cc_terminal_id = $new_cc_terminal_id;
+    $config->cc_live = $new_cc_live;
+
+    $config->update();
+
+    header("Location: config5.phtml");
+    exit();
+  }
+
+  html_head();
+?>
+
+<b>Store Configuration Wizard - Step 4 of 4</b>
+
+<hr noshade size=1>
+
+<p>
+
+<b><?php echo $errmsg ?></b><p>
+
+<form action="<?php echo $PHP_SELF ?>" method="post">
+<input type=hidden name="step" value="1">
+
+<center>
+<a href="config3.phtml"><img border=0 src="../img/button-previous.gif" alt="Previous"></a> &nbsp; <a href="config4.phtml"><img border=0 src="../img/button-reset.gif" alt="Reset"></a> &nbsp; <input type=image border=0 src="../img/button-next.gif" alt="Next">
+
+<p>
+
+<table border=0>
+
+<tr>
+<td><?php echo FONT1 ?>
+<b>Credit Card Terminal ID</b>
+</font></td>
+<td>
+<input type=text name="new_cc_terminal_id" value="<?php echo htmlspecialchars($new_cc_terminal_id) ?>" size=15 maxlength=200>
+</td>
+</tr>
+
+<tr>
+<td><?php echo FONT1 ?>
+<b>Is Store Live?</b>
+</font></td>
+<td><?php echo FONT1 ?>
+<input type=radio name="new_cc_live" value="1"<?php if ($new_cc_live == "1") echo " checked"; ?>> Yes
+&nbsp;&nbsp;
+<input type=radio name="new_cc_live" value="0"<?php if ($new_cc_live == "0") echo " checked"; ?>> No
+</font></td>
+</tr>
+
+</table>
+
+<p>
+
+<a href="config3.phtml"><img border=0 src="../img/button-previous.gif" alt="Previous"></a> &nbsp; <a href="config4.phtml"><img border=0 src="../img/button-reset.gif" alt="Reset"></a> &nbsp; <input type=image border=0 src="../img/button-next.gif" alt="Next">
+</center>
+
+<?php
+  html_tail();
+?>

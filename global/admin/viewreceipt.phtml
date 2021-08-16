@@ -1,0 +1,51 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  html_head();
+?>
+
+<a href="viewtrans.phtml"><font color=Green>View Transactions</font></a> |
+<b>View Receipts</b>
+
+<hr noshade size=1>
+
+<p>
+
+Enter the Order # of the receipt you wish to view.<p>
+
+<form action="<?php echo $PHP_SELF ?>" method="get">
+<input type=text name="id" value="<?php echo $id ?>" size=10 maxlength=10> <input type=submit value="View Receipt">
+</form>
+
+<p>
+
+<?php
+  if ($id):
+?>
+
+<?php
+  $receipt = new Receipt(0, $id);
+?>
+<font face="Courier New, Courier" size="-1">
+<pre>
+
+<?php echo $receipt->receipt ?>
+</pre>
+</font>
+
+<?php
+  endif;
+?>
+
+<?php
+  html_tail();
+?>

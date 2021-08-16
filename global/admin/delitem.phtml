@@ -1,0 +1,126 @@
+<?php
+  // IMPORTANT NOTE: 
+  // When modifying this script, check to see if any changes here
+  // need to be replicated in the "additem.phtml" script b/c it
+  // shares a lot of code with this script.
+  //
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  if ($sku) {
+    $skus = explode(",", $sku);
+
+    for ($a = 0; $a < count($skus); $a++) {
+      $item = new Item(0, $skus[$a]);
+
+      if ($item->id)
+        $items[] = $item;
+    }
+  }
+
+  if (!$referer) {
+    if ($HTTP_REFERER)
+      $referer = $HTTP_REFERER;
+    else
+      $referer = "viewitems.phtml";
+  }
+
+  // Do the actual deletion of the item, if Delete was clicked.
+  // Otherwise, don't do anything.
+  if (count($items) && $step) {
+    for ($a = 0; $a < count($items); $a++)
+      $items[$a]->delete();
+
+    $errmsg =  "The item(s) have been deleted.";
+  }
+
+  html_head();
+?>
+
+<a href="viewitems.phtml"><font color=Green>View Items</font></a> | 
+<a href="additem.phtml"><font color=Green>Add Items</font></a> |
+<a href="addoption.phtml"><font color=Green>Add Item Options</font></a> |
+<a href="moditem.phtml"><font color=Green>Modify Items</font></a> |
+<b>Delete Items</b>
+
+<hr noshade size=1>
+
+<p>
+
+<ul>
+<li><a href="<?php echo $referer ?>">Return to View Items</a>
+</ul>
+
+<p>
+
+<b><?php echo $errmsg ?></b><p>
+
+<?php
+  //
+  // If no original sku has been specified (or one that doesn't exist was
+  // specified), then print the default form to ask for a sku
+  //
+  if (!count($items)):
+?>
+
+Enter the SKU of the item you wish to delete.<br>
+Note: You will be displayed the item to confirm before deletion.<p>
+
+<form action="<?php echo $PHP_SELF ?>" method="get">
+
+SKU <input type=text name="sku" size=20 maxlength=40> <input type=submit value="Show Item">
+
+</form>
+
+<?php html_exit(); ?>
+
+<?php
+  //
+  // If the delitem form hasn't been submitted yet, or if it was
+  // submitted and items were missing, print it out again
+  //
+  elseif (count($items) && !$step):
+?>
+
+
+<form action="<?php echo $PHP_SELF ?>" method="post">
+<input type=hidden name="step" value="1">
+<input type=hidden name="referer" value="<?php echo $referer ?>">
+<input type=hidden name="sku" value="<?php
+  for ($a = 0; $a < count($items); $a++) {
+    if ($a) echo ",";
+    echo $items[$a]->sku;
+  }
+?>">
+
+Are you sure you want to delete these items?<p>
+
+<input type=submit name="delete" value="     Yes, Delete     ">
+
+<p>
+
+Items:
+
+<?php
+  echo "<ul>\n";
+  for ($a = 0; $a < count($items); $a++) {
+    echo "<li>" . $items[$a]->sku . " " . $items[$a]->name . "\n";
+  }
+  echo "</ul>\n";
+?>
+
+<?php
+  endif;
+?>
+
+<?php
+  html_tail();
+?>

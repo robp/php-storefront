@@ -1,0 +1,117 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  html_head();
+
+  // Setup which form inputs are required
+  $required1 = array("name", "parent_id", "template_id");
+
+  // Check to see that all required form inputs are found
+  for ($i = 0; $i < sizeof($required1); $i++) {
+    if (!strlen($$required1[$i])) {
+      $missing_info = 1;
+      break;
+    }
+  }
+
+  // If inputs are missing, print a message
+  if ($step && $missing_info) {
+    echo "<b>You didn't enter all of the required information.</b><p>\n";
+  }
+  elseif ($step && !$missing_info) {
+    $category = new Category();
+    $category->parent_id = $parent_id;
+    $category->template_id = $template_id;
+    $category->name = trim($name);
+    $category->desc_short = trim($desc_short);
+    $category->desc_long1 = trim($desc_long1);
+    $category->desc_long2 = trim($desc_long2);
+    $category->img_small = trim($img_small);
+    $category->img_medium = trim($img_medium);
+    $category->img_large = trim($img_large);
+
+    $query = "SELECT id FROM categories
+              WHERE parent_id = $category->parent_id
+              AND name LIKE '" . addslashes($category->name) . "'";
+
+    if (!$sql_result = mysql_query($query, $sock)) {
+      echo mysql_error();
+      html_exit();
+    }
+
+    // Check to see if the category already exists in the database.
+    if (mysql_num_rows($sql_result) > 0) {
+      echo "<b>Category already exists under specified parent.</b><p>\n";
+      $missing_info = 1;
+    }
+    else {
+      $category->insert();
+      $errmsg  = "Category added.";
+    }
+  }
+
+  if (!$parent_id) $parent_id = 0;
+?>
+
+<a href="viewcats.phtml"><font color=Green>View Categories</font></a> |
+<b>Add Categories</b> |
+<a href="delcat.phtml"><font color=Green>Delete Categories</font></a>
+
+<hr noshade size=1>
+
+<p>
+
+<b><?php echo $errmsg ?></b><p>
+
+
+Use this form to add new categories to the inventory database.<br>
+New categories will automatically appear in the menus for new items.<p>
+
+Enter the name of the category as it should appear in menus, listings, etc.<p>
+
+<form action="<?php echo $PHP_SELF ?>" method="post">
+<input type=hidden name="step" value=1>
+<table border=0>
+<tr><td><?php echo FONT1 ?>Parent Name:</font></td><td><?php echo FONT1 ?><select name="parent_id"><option value="0">None
+<?php
+    list_categories_select($parent_id, 1);
+?>
+</select></font></td></tr>
+
+<tr><td><?php echo FONT1 ?>Category Name:</font></td><td><?php echo FONT1 ?><input type=text name="name" value="<?php echo htmlspecialchars($name) ?>" size=40 maxlength=80></font></td></tr>
+
+<tr><td><?php echo FONT1 ?><br><b>Options:</b><br><br></font></td></tr>
+
+<tr><td><?php echo FONT1 ?>Template:</font></td><td><?php echo FONT1 ?><select name="template_id"><option value="0">None
+<?php
+    list_category_templates_select(0, 1);
+?>
+</select></font></td></tr>
+
+<tr><td colspan=2><font face="Arial, MS Sans Serif, Helvetica" size="-1"><h4>Enter descriptions for this category (may contain HTML)</font></td></tr>
+<tr><td><font face="Arial, MS Sans Serif, Helvetica" size="-1">Short Description</font></td><td><font face="Arial, MS Sans Serif, Helvetica" size="-1"><input type=text name="desc_short" value="<?php echo htmlspecialchars($desc_short) ?>" size=40 maxlength=200></font></td></tr>
+<tr><td><font face="Arial, MS Sans Serif, Helvetica" size="-1">Long Description #1</font></td><td><font face="Arial, MS Sans Serif, Helvetica" size="-1"><textarea name="desc_long1" rows=6 cols=40><?php echo $desc_long1 ?></textarea></font></td></tr>
+<tr><td><font face="Arial, MS Sans Serif, Helvetica" size="-1">Long Description #2</font></td><td><font face="Arial, MS Sans Serif, Helvetica" size="-1"><textarea name="desc_long2" rows=6 cols=40><?php echo $desc_long2 ?></textarea></font></td></tr>
+
+<tr><td><br></td></tr>
+<tr><td colspan=2><font face="Arial, MS Sans Serif, Helvetica" size="-1"><h4>Enter URLs for images (full path or relative)</font></td></tr>
+<tr><td><font face="Arial, MS Sans Serif, Helvetica" size="-1">Image URL Small</font></td><td><font face="Arial, MS Sans Serif, Helvetica" size="-1"><input type=text name="img_small" value="<?php echo htmlspecialchars($img_small) ?>" size=40 maxlength=200></font></td></tr>
+<tr><td><font face="Arial, MS Sans Serif, Helvetica" size="-1">Image URL Medium</font></td><td><font face="Arial, MS Sans Serif, Helvetica" size="-1"><input type=text name="img_medium" value="<?php echo htmlspecialchars($img_medium) ?>" size=40 maxlength=200></font></td></tr>
+<tr><td><font face="Arial, MS Sans Serif, Helvetica" size="-1">Image URL Large</font></td><td><font face="Arial, MS Sans Serif, Helvetica" size="-1"><input type=text name="img_large" value="<?php echo htmlspecialchars($img_large) ?>" size=40 maxlength=200></font></td></tr>
+
+<tr><td></td><td><?php echo FONT1 ?><br><input type=submit value="    Add Category   "></font></td></tr>
+</table>
+</form>
+
+<?php
+  html_tail();
+?>

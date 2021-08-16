@@ -1,0 +1,113 @@
+<?php
+  // IMPORTANT NOTE: 
+  // When modifying this script, check to see if any changes here
+  // need to be replicated in the "additem.phtml" script b/c it
+  // shares a lot of code with this script.
+  //
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  html_head();
+
+  if ($id && is_array($id)) {
+    // for each item in the id[] array...
+    for ($j = 0; $j < count($id); $j++) {
+      $template = new Template(0, $id[$j]);
+      $template->delete();
+    }
+
+    $errmsg = "Templates removed.";
+  }
+
+  $query = "SELECT COUNT(*) FROM templates";
+
+  if (!$sql_result = mysql_query($query, $sock)) {
+    echo mysql_error();
+    html_exit();
+  }
+
+  $sql_result_row = mysql_fetch_row($sql_result);
+  $num_templates = $sql_result_row[0];
+?>
+
+<b>View Templates</b> |
+<a href="addtemplate.phtml"><font color=Green>Add Templates</font></a>
+
+<hr noshade size=1>
+
+<p>
+
+<b><?php echo $errmsg ?></b><p>
+
+There are <?php echo $num_templates ?> templates registered.<p>
+
+<form action="<?php echo $PHP_SELF ?>" method="post">
+<input type=hidden name="step" value="1">
+
+<input type=submit value="Delete selected templates"><p>
+
+<table border=2 cellspacing=0>
+<tr>
+<td align=center nowrap><?php echo FONT1 ?><b>Delete</b></font></td>
+<td align=center nowrap><?php echo FONT1 ?><b>ID</b></font></td>
+<td align=center nowrap><?php echo FONT1 ?><b>Type</b></font></td>
+<td align=center nowrap><?php echo FONT1 ?><b>Used By</b></font></td>
+<td align=center nowrap><?php echo FONT1 ?><b>Filename</b></font></td>
+<td align=center nowrap><?php echo FONT1 ?><b>Description</b></font></td>
+</tr>
+
+<?php
+  $query = "SELECT * FROM templates
+            ORDER BY id";
+
+  if (!$sql_result = mysql_query($query, $sock)) {
+    echo mysql_error();
+    html_exit();
+  }
+
+  for ($i = 0; $i < mysql_num_rows($sql_result); $i++) {
+    $template = new Template(mysql_fetch_row($sql_result), 0);
+
+    if ($template->type == 0)
+      $query = "SELECT COUNT(id) FROM items_dynamic
+                WHERE template_id = " . $template->id;
+    else
+      $query = "SELECT COUNT(id) FROM categories
+                WHERE template_id = " . $template->id;
+
+    if (!$sql_result2 = mysql_query($query, $sock)) {
+      echo mysql_error();
+      html_exit();
+    }
+
+    $sql_result_row = mysql_fetch_row($sql_result2);
+    $num_used_by = $sql_result_row[0];
+
+    printf("<tr><td align=center><input type=checkbox name=\"id[]\" value=\"%d\"></td>
+<td align=center><font size=-1>%d</font></td>
+<td align=center><font size=-1>%s</font></td>
+<td align=center><font size=-1>%d</font></td>
+<td><font size=-1><a href=\"viewtemplate.phtml?id=%d\">%s</a></font></td>
+<td><font size=-1>%s</font></td></tr>\n",
+      $template->id, $template->id, 
+      ($template->type == 0 ? "Product" : "Category"),
+      $num_used_by, $template->id, $template->filename, $template->description);
+  }
+?>
+</table><p>
+
+<input type=submit value="Delete selected templates"><p>
+
+</form>
+
+<?php
+  html_tail();
+?>

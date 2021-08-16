@@ -1,0 +1,55 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  $sock = db_connect();
+  $config = new Config();
+
+  html_head();
+?>
+
+<a href="home.phtml"><font color=Green>Administrator Home</font></a> |
+<b>Recent Updates</b>
+
+<hr noshade size=1>
+
+<p>
+
+<b>Remember:</b> If you are using HTML caching (ON by default), changes to the Product, Category or Sale/Discount databases will not be reflected on <i>product.phtml</i> and <i>category.phtml</i> until you have <a href="index.phtml?s=config&f=clearcache.phtml" target="_top">cleared the HTML cache</a>, or automatically at midnight.<p>
+
+<b>Recent Updates:</b><p>
+
+<ul>
+<li><b>Friday, March 3, 2000</b><p>
+I've finished a beta of the "User Accounts" feature. You can try it out at <a href="http://www.wincom.net/store/">The WINCOM Store</a>. This is a demo store so feel free to play around with the checkout area. BTW, all new User Account pages (like the addressbook, etc) are template-driven, so you'll be able to modify them at your leisure!<p>
+
+<li><b>Friday, March 3, 2000</b><p>
+I've also finished re-coding the checkout area so that it is completely template-driven. This means you'll be able to make changes to the look and feel of the checkout area whenever you choose, simply by editing the templates.  <b>This has not been put into place on your sites yet!</b> It will be put in place after I finish testing.<p>
+
+<li><b>Friday, February 18, 2000</b><p>
+The <i>viewbasket.phtml</i> page used for viewing orders is now template-driven, which means you can make changes to the look of this page at any time. The templates used for this page are found in the "templates" directory of your commerce FTP area and are called <i>viewbasket.html</i> and <i>viewbasket-empty.html</i>. You can edit these files as you see fit. Be careful when editing the LOOP areas, though!<p>
+
+<li><b>Wednesday, February 16, 2000</b><p>
+Page cacheing is now in effect. This is to speed up the response time of <i>product.phtml</i> and <i>category.phtml</i>, and to ease server load. See the above notice for more information.<p>
+
+<li><b>Friday, February 11, 2000</b><p>
+The product discounting module has been totally redone. Any existing sales were imported into the new discount module. It's a bit trickier to use, but considerably more flexible.<p>
+
+Various changes to the View Directories and View Inventory pages of the Administrator.<p>
+
+<li><b>Wednesday, February 2, 2000</b><p>
+The Shipping area has been totally redone. You can now create your own shipping types and zones for use in shipping calculations for the checkout area of your commerce site. Again, it's a bit trickier to use, but very flexible.<p>
+
+
+<li>Hope you like the new Administrator interface! Any comments or suggestions can be sent to the address at the bottom of any page in the Administrator.
+</ul>
+
+<p>
+
+<?php
+  html_tail();
+?>

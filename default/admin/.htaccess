@@ -1,0 +1,7 @@
+AuthUserFile /export/home/u/username/htpasswd/storeadmin.htpasswd
+AuthName "Store Name Admin"
+AuthType Basic
+
+<Limit PUT GET POST>
+require valid-user
+</Limit>

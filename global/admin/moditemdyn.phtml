@@ -1,0 +1,156 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  html_head();
+
+  $required1 = array("id");
+  $required2 = array("template_id");
+
+  // Check to see that all required form inputs are found
+  for ($i = 0; $i < sizeof($required1); $i++) {
+    if (!strlen($$required1[$i])) {
+      $missing_info = 1;
+      break;
+    }
+  }
+  if ($step) {
+    for ($i = 0; $i < sizeof($required1); $i++) {
+      if (!strlen($$required1[$i])) {
+        $missing_info = 1;
+        break;
+      }
+    }
+  }
+
+  if ($missing_info) {
+    $errmsg = "You didn't supply all of the required information.";
+  }
+  else {
+    $itemdyn = new ItemDyn (NULL, $id);
+
+    // If we retrieved an actual entry from the table,
+    // then we're going to update this one. Otherwise,
+    // we'll be inserting a new entry.
+    if ($itemdyn->id)
+      $update = 1;
+    else
+      $itemdyn->id = $id;
+  }
+
+  if ($step && !$missing_info) {
+    $itemdyn->template_id = $template_id;
+    $itemdyn->name = trim($name);
+    $itemdyn->option1desc = trim($option1desc);
+    $itemdyn->option2desc = trim($option2desc);
+    $itemdyn->option3desc = trim($option3desc);
+    $itemdyn->option4desc = trim($option4desc);
+    $itemdyn->option5desc = trim($option5desc);
+    $itemdyn->option6desc = trim($option6desc);
+    $itemdyn->option7desc = trim($option7desc);
+    $itemdyn->option8desc = trim($option8desc);
+    $itemdyn->option9desc = trim($option9desc);
+    $itemdyn->option10desc = trim($option10desc);
+    $itemdyn->desc_short = $desc_short;
+    $itemdyn->desc_long1 = $desc_long1;
+    $itemdyn->desc_long2 = $desc_long2;
+    $itemdyn->img_small = trim($img_small);
+    $itemdyn->img_medium = trim($img_medium);
+    $itemdyn->img_large = trim($img_large);
+
+    if ($update)
+      $itemdyn->update();
+    else
+      $itemdyn->insert();
+
+    $errmsg = "Dynamic item updated.";
+  }
+?>
+
+<?php if ($errmsg) echo "<b>$errmsg</b><p>" ?>
+
+<form action="<?php echo $PHP_SELF ?>" method="post">
+<input type="hidden" name="step" value="1">
+<input type="hidden" name="id" value="<?php echo $itemdyn->id ?>">
+
+
+<table border=0 width=500>
+<tr>
+<td><?php echo FONT1 ?><input type=reset value="Undo Changes"> &nbsp; <input type=submit value="Submit Changes"></font></td>
+<td align=right><?php echo FONT1 ?><a href="<?php echo $config->store_url ?>dyn/product.phtml?id=<?php echo $itemdyn->id ?>" target="_new">View This Product</a></font></td>
+</tr>
+</table>
+
+<p>
+
+<table border=0>
+<tr><td colspan=2><?php echo FONT1 ?><h4>Choose a template file for use with this item</font></td></tr>
+<tr><td><?php echo FONT1 ?>Template</font></td><td><?php echo FONT1 ?><select name="template_id"><option value=""> <?php list_product_templates_select($itemdyn->template_id, 0) ?></select></font></td></tr>
+
+<tr><td><br></td></tr>
+<tr><td colspan=2><?php echo FONT1 ?><h4>Enter a name for this item (no HTML)</font></td></tr>
+<tr><td><?php echo FONT1 ?>Name</font></td><td><?php echo FONT1 ?><input type=text name="name" value="<?php echo htmlspecialchars($itemdyn->name) ?>" size=40 maxlength=60></font></td></tr>
+
+<tr><td><br></td></tr>
+<tr><td colspan=2><?php echo FONT1 ?><h4>Enter descriptions for this item (may contain HTML)</font></td></tr>
+<tr><td><?php echo FONT1 ?>Short Description</font></td><td><?php echo FONT1 ?><input type=text name="desc_short" value="<?php echo htmlspecialchars($itemdyn->desc_short) ?>" size=40 maxlength=200></font></td></tr>
+<tr><td><?php echo FONT1 ?>Long Description #1</font></td><td><?php echo FONT1 ?><textarea name="desc_long1" rows=6 cols=40><?php echo $itemdyn->desc_long1 ?></textarea></font></td></tr>
+<tr><td><?php echo FONT1 ?>Long Description #2</font></td><td><?php echo FONT1 ?><textarea name="desc_long2" rows=6 cols=40><?php echo $itemdyn->desc_long2 ?></textarea></font></td></tr>
+
+<tr><td><br></td></tr>
+<tr><td colspan=2><?php echo FONT1 ?><h4>Enter URLs for images (full path or relative)</font></td></tr>
+<tr><td><?php echo FONT1 ?>Image URL Small</font></td><td><?php echo FONT1 ?><input type=text name="img_small" value="<?php echo $itemdyn->img_small ?>" size=40 maxlength=200></font></td></tr>
+<tr><td><?php echo FONT1 ?>Image URL Medium</font></td><td><?php echo FONT1 ?><input type=text name="img_medium" value="<?php echo $itemdyn->img_medium ?>" size=40 maxlength=200></font></td></tr>
+<tr><td><?php echo FONT1 ?>Image URL Large</font></td><td><?php echo FONT1 ?><input type=text name="img_large" value="<?php echo $itemdyn->img_large ?>" size=40 maxlength=200></font></td></tr>
+</table>
+
+<p>
+
+<table border=0>
+
+<tr><td><br></td></tr>
+<tr><td colspan=2><?php echo FONT1 ?><h4>Enter descriptions of selectable options</font></td></tr>
+<tr>
+<td><?php echo FONT1 ?>Option 1<br><input type=text name="option1desc" value="<?php echo htmlspecialchars($itemdyn->option1desc) ?>" size=20 maxlength=30></font></td>
+<td><?php echo FONT1 ?>Option 2<br><input type=text name="option2desc" value="<?php echo htmlspecialchars($itemdyn->option2desc) ?>" size=20 maxlength=30></font></td>
+</tr>
+<tr>
+<td><?php echo FONT1 ?>Option 3<br><input type=text name="option3desc" value="<?php echo htmlspecialchars($itemdyn->option3desc) ?>" size=20 maxlength=30></font></td>
+<td><?php echo FONT1 ?>Option 4<br><input type=text name="option4desc" value="<?php echo htmlspecialchars($itemdyn->option4desc) ?>" size=20 maxlength=30></font></td>
+</tr>
+<tr>
+<td><?php echo FONT1 ?>Option 5<br><input type=text name="option5desc" value="<?php echo htmlspecialchars($itemdyn->option5desc) ?>" size=20 maxlength=30></font></td>
+<td><?php echo FONT1 ?>Option 6<br><input type=text name="option6desc" value="<?php echo htmlspecialchars($itemdyn->option6desc) ?>" size=20 maxlength=30></font></td>
+</tr>
+<tr>
+<td><?php echo FONT1 ?>Option 7<br><input type=text name="option7desc" value="<?php echo htmlspecialchars($itemdyn->option7desc) ?>" size=20 maxlength=30></font></td>
+<td><?php echo FONT1 ?>Option 8<br><input type=text name="option8desc" value="<?php echo htmlspecialchars($itemdyn->option8desc) ?>" size=20 maxlength=30></font></td>
+</tr>
+<tr>
+<td><?php echo FONT1 ?>Option 9<br><input type=text name="option9desc" value="<?php echo htmlspecialchars($itemdyn->option9desc) ?>" size=20 maxlength=30></font></td>
+<td><?php echo FONT1 ?>Option 10<br><input type=text name="option10desc" value="<?php echo htmlspecialchars($itemdyn->option10desc) ?>" size=20 maxlength=30></font></td>
+</tr>
+</table>
+
+<p>
+
+<table border=0 width=500>
+<tr>
+<td><?php echo FONT1 ?><input type=reset value="Undo Changes"> &nbsp; <input type=submit value="Submit Changes"></font></td>
+<td align=right><?php echo FONT1 ?><a href="<?php echo $config->store_url ?>dyn/product.phtml?id=<?php echo $itemdyn->id ?>" target="_new">View This Product</a></font></td>
+</tr>
+</table>
+
+<p>
+
+<?php
+  html_tail();
+?>

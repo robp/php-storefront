@@ -1,0 +1,160 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  html_head();
+
+  // Setup which form inputs are required
+  $required1 = array("sku", "name", "price");
+
+  // Check to see that all required form inputs are found
+  for ($i = 0; $i < sizeof($required1); $i++) {
+    if (!$$required1[$i]) {
+      $missing_info = 1;
+      break;
+    }
+  }
+
+  if (!$weight)
+    $weight = 0;
+
+  // Set this if the default is "ON" for the PST and GST buttons
+  if (!$step) $pst = $gst = 1;
+
+  if ($step && $missing_info)
+    $errmsg = "You didn't enter all the required information.";
+
+  elseif ($step == 1 && !$missing_info) {
+    sprintf($price, "%.2f", $price);
+
+    $item = new Item();
+    $item->category = $category;
+    $item->sku = $sku;
+    $item->name = $name;
+    $item->price = $price;
+    $item->pst = $pst;
+    $item->gst = $gst;
+    $item->weight = $weight;
+    $item->weight_type = $weight_type;
+    $item->option1 = $option1;
+    $item->option2 = $option2;
+    $item->option3 = $option3;
+    $item->option4 = $option4;
+    $item->option5 = $option5;
+    $item->option6 = $option6;
+    $item->option7 = $option7;
+    $item->option8 = $option8;
+    $item->option9 = $option9;
+    $item->option10 = $option10;
+
+    $item->insert();
+
+    $errmsg = "The item has been added.";
+  }
+?>
+
+<a href="viewitems.phtml"><font color=Green>View Items</font></a> |
+<b>Add Items</b> |
+<a href="addoption.phtml"><font color=Green>Add Item Options</font></a> |
+<a href="moditem.phtml"><font color=Green>Modify Items</font></a> |
+<a href="delitem.phtml"><font color=Green>Delete Items</font></a>
+
+<hr noshade size=1>
+
+<p>
+
+<b><?php echo $errmsg ?></b><p>
+
+<form action="<?php echo $PHP_SELF ?>" method="post">
+<input type=hidden name="step" value="1">
+
+<input type=reset value="Reset"> &nbsp;&nbsp; <input type=submit value="Continue">
+
+<p>
+
+Category<br>
+<select name="category"><option value="0">None
+
+<?php
+  list_categories_select(0, 1);
+?>
+
+</select><p>
+
+SKU<br>
+<input type=text name="sku" value="<?php echo htmlspecialchars($sku) ?>" size=40 maxlength=40><p><p>
+
+Name<br>
+<input type=text name="name" value="<?php echo htmlspecialchars($name) ?>" size=60 maxlength=80><p>
+
+<table border=0 cellpadding=0 cellspacing=0>
+<tr>
+<td valign=top>
+<?php echo FONT1 ?>
+Price (##.##)<br>
+<input type=text name="price" value="<?php echo htmlspecialchars($price) ?>" size=20 maxlength=20><p>
+
+<input type=checkbox name="gst" value="1"<?php if ($gst) echo " checked"; ?>> Charge GST where applicable?<br>
+<input type=checkbox name="pst" value="1"<?php if ($pst) echo " checked"; ?>> Charge PST where applicable?<p>
+</font>
+</td>
+
+<td width=50></td>
+
+<td valign=top>
+<?php echo FONT1 ?>
+Weight (##.##)<br>
+<input type=text name="weight" value="<?php echo htmlspecialchars($weight) ?>" size=20 maxlength=20><p>
+
+<input type=radio name="weight_type" value="0"<?php if ($weight_type == 0) echo " checked"; ?>> Kilograms<br>
+<input type=radio name="weight_type" value="1"<?php if ($weight_type == 1) echo " checked"; ?>> Pounds<br>
+</font>
+</td>
+</tr>
+</table>
+
+<p>
+
+<table border=0>
+<tr>
+<td><?php echo FONT1 ?>Option 1<br><input type=text name="option1" value="<?php echo htmlspecialchars($option1) ?>" size=30 maxlength=40></font></td>
+<td width=10> </td>
+<td><?php echo FONT1 ?>Option 2<br><input type=text name="option2" value="<?php echo htmlspecialchars($option2) ?>" size=30 maxlength=40></font></td>
+</tr>
+<tr>
+<td><?php echo FONT1 ?>Option 3<br><input type=text name="option3" value="<?php echo htmlspecialchars($option3) ?>" size=30 maxlength=40></font></td>
+<td width=10> </td>
+<td><?php echo FONT1 ?>Option 4<br><input type=text name="option4" value="<?php echo htmlspecialchars($option4) ?>" size=30 maxlength=40></font></td>
+</tr>
+<tr>
+<td><?php echo FONT1 ?>Option 5<br><input type=text name="option5" value="<?php echo htmlspecialchars($option5) ?>" size=30 maxlength=40></font></td>
+<td width=10> </td>
+<td><?php echo FONT1 ?>Option 6<br><input type=text name="option6" value="<?php echo htmlspecialchars($option6) ?>" size=30 maxlength=40></font></td>
+</tr>
+<tr>
+<td><?php echo FONT1 ?>Option 7<br><input type=text name="option7" value="<?php echo htmlspecialchars($option7) ?>" size=30 maxlength=40></font></td>
+<td width=10> </td>
+<td><?php echo FONT1 ?>Option 8<br><input type=text name="option8" value="<?php echo htmlspecialchars($option8) ?>" size=30 maxlength=40></font></td>
+</tr>
+<tr>
+<td><?php echo FONT1 ?>Option 9<br><input type=text name="option9" value="<?php echo htmlspecialchars($option9) ?>" size=30 maxlength=40></font></td>
+<td width=10> </td>
+<td><?php echo FONT1 ?>Option 10<br><input type=text name="option10" value="<?php echo htmlspecialchars($option10) ?>" size=30 maxlength=40></font></td>
+</tr>
+</table>
+
+<p>
+
+<input type=reset value="Reset"> &nbsp;&nbsp; <input type=submit value="Continue">
+
+<?php
+  html_tail();
+?>

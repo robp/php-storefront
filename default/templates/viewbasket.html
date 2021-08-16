@@ -1,0 +1,157 @@
+<head>
+
+<head>
+<title>%STORE_NAME%: Your Order</title>
+</head>
+
+<body bgcolor=#ffffff>
+
+<center>
+<table border=0 width=80%>
+<tr>
+<td>
+<font face="Arial, MS Sans Serif, Helvetica" size=2>
+
+<center>
+<h1>%STORE_NAME%</h1>
+</center>
+
+<h3>Your Order</h3>
+
+<form action="updatebasket.phtml" method="post">
+<input type=hidden name="referer" value="%HTTP_REFERER%">
+
+Please review your order below. To change the quantity of an item, enter a new number in the Qty box, then click Recalculate Subtotal. To remove an item, change that item's Qty to 0 then click Recalculate Subtotal, or click the trash can icon next to that bundle.
+
+<p>
+
+<table border=0 cellpadding=0 cellspacing=0 width=100%>
+<tr>
+<td nowrap align=left width=180><font face="Arial, MS Sans Serif, Helvetica" size=1><b>Item</b></font></td>
+<td nowrap align=left><font face="Arial, MS Sans Serif, Helvetica" size=1><b>Part No.</b></font></td>
+<td nowrap align=right><font face="Arial, MS Sans Serif, Helvetica" size=1><b>Unit Price</b></font></td>
+<td nowrap align=center><font face="Arial, MS Sans Serif, Helvetica" size=1><b>Qty.</b></font></td>
+<td nowrap align=right><font face="Arial, MS Sans Serif, Helvetica" size=1><b>Price</b></font></td>
+</tr>
+
+<tr>
+<td colspan=6><img height=1 vspace=4 width=100% border=0 alt="Image" align=middle src="img/pixelblack.gif"></td>
+</tr>
+
+
+%BEGIN_LOOP%
+
+<tr>
+<td colspan=2 width=180><font face="Arial, MS Sans Serif, Helvetica" size=3><b>%BUNDLE_NAME%</b></font></td>
+
+<td align=right><font face="Arial, MS Sans Serif, Helvetica" size=1>$%BUNDLE_PRICE%</font></td>
+
+<td align=center><input size=3 maxlength=3 type=text name="%BUNDLE_ID%" value="%BUNDLE_QUANTITY%"></td>
+
+<td align=right><font face="Arial, MS Sans Serif, Helvetica" size=1><b>$%BUNDLE_SUBTOTAL%</b></font></td>
+
+<td><font face="Arial, MS Sans Serif, Helvetica" size=1>&nbsp;&nbsp;<a href="updatebasket.phtml?remove=%BUNDLE_ID%&referer=%HTTP_REFERER%"><img width=15 height=16 border=0 src="img/iconsmalltrashcan.gif" alt="Remove item"></a></font></td>
+</tr>
+
+%BEGIN_INNER_LOOP%
+
+<tr>
+<td><font face="Arial, MS Sans Serif, Helvetica" size=1>&nbsp;&nbsp;&nbsp;%PRODUCT_NAME%</font></td>
+
+<td valign=top align=left><font face="Arial, MS Sans Serif, Helvetica" size=1>%PRODUCT_SKU%</font></td>
+</tr>
+
+%END_INNER_LOOP%
+
+<tr>
+<td colspan=6><img height=1 vspace=4 width=100% border=0 alt="Image" align=middle src="img/pixelblack.gif"></td>
+</tr>
+
+%END_LOOP%
+
+%BEGIN_DISCOUNT%
+
+<tr bgcolor=#e0e0e0>
+<td colspan=4>
+<font face="Arial, MS Sans Serif, Helvetica" size=2>
+<b>Applicable discounts</b>
+</font>
+</td>
+<td align=right>
+<font face="Arial, MS Sans Serif, Helvetica" size=1>- $%DISCOUNT_VALUE%</font></td>
+<td> &nbsp; </td>
+</tr>
+
+<tr>
+<td colspan=6><img height=1 vspace=4 width=100% border=0 alt="Image" align=middle src="img/pixelblack.gif"></td>
+</tr>
+
+%END_DISCOUNT%
+
+</table>
+
+<p>
+
+<table border=0 cellpadding=0 cellspacing=0 width=100%>
+<tr>
+<td rowspan=2 align>
+<font face="Arial, MS Sans Serif, Helvetica" size=1>
+<blockquote>
+Please note that your order subtotal may not include applicable sales tax or rebates.
+</blockquote>
+</font></td>
+
+<td width=20 rowspan=2> </td>
+
+<td align=right>
+<font face="Arial, MS Sans Serif, Helvetica" size=1>
+<b>Order Subtotal</b></font>
+
+<font face="Arial, MS Sans Serif, Helvetica" size=4 color=#CC0000>
+<b>$%ORDER_SUBTOTAL%</b></font>
+</td>
+</tr>
+
+<tr>
+<td align=right>
+<input width=148 height=26 vspace=4 border=0 alt="Recalculate Subtotal" type=image name="update" src="img/buttonrecalculatesubtotal.gif"></td>
+</tr>
+</table>
+
+<p>
+
+<b>Your order will expire in %ORDER_EXPIRY_TIME%.</b>
+
+<p>
+
+<font face="Arial, MS Sans Serif, Helvetica" size=2>
+To save your order while continuing to shop, click Continue Shopping.
+To place your order now, click Checkout. (You will still have an opportunity to change or cancel your order.)
+
+<p>
+
+<table border=0 cellpadding=0 cellspacing=0 width=100%>
+<tr>
+<td align=left nowrap>
+<input width=148 height=26 border=0 alt="Continue Shopping" type=image name="shop" src="img/buttoncontinueshopping.gif">
+</td>
+
+<td align=right nowrap>
+<input width=86 height=26 border=0 alt=Checkout type=image name="checkout" src="img/buttoncheckout.gif">
+</td>
+</tr>
+</table>
+
+</form>
+
+<p>
+
+</font>
+</td>
+</tr>
+</table>
+</center>
+
+</body>
+</html>
+

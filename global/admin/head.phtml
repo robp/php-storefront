@@ -1,0 +1,204 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  $sock = db_connect();
+  $config = new Config();
+
+  if (!$s) $s = "home";
+
+  if ($s == "home") {
+    $img = "img/nav-home.gif";
+    $mapname = "nav-home";
+    $map = '
+<map name="nav-home">
+<area shape="rect" alt="Home" coords="14,1,76,22" href="index.phtml" title="Home">
+<area shape="rect" alt="Configuration" coords="87,0,140,22" href="index.phtml?s=config" title="Configuration">
+<area shape="rect" alt="Inventory" coords="148,0,219,22" href="index.phtml?s=inventory" title="Inventory">
+<area shape="rect" alt="Categories" coords="228,0,305,22" href="index.phtml?s=categories" title="Categories">
+<area shape="rect" alt="Shipping" coords="315,0,382,22" href="index.phtml?s=shipping" title="Shipping">
+<area shape="rect" alt="Sale Items" coords="391,0,438,22" href="index.phtml?s=sales" title="Sale Items">
+<area shape="rect" alt="Transactions" coords="447,0,536,22" href="index.phtml?s=transactions" title="Transactions">
+<area shape="rect" alt="Templates" coords="546,0,620,22" href="index.phtml?s=templates" title="Templates">
+<area shape="default" nohref>
+</map>
+';
+  }
+    
+  if ($s == "config") {
+    $img = "img/nav-config.gif";
+    $mapname = "nav-config";
+    $map = '
+<map name="nav-config">
+<area shape="rect" alt="Home" coords="12,0,63,22" href="index.phtml" title="Home">
+<area shape="rect" alt="Configuration" coords="70,0,139,22" href="index.phtml?s=config" title="Configuration">
+<area shape="rect" alt="Inventory" coords="149,0,217,22" href="index.phtml?s=inventory" title="Inventory">
+<area shape="rect" alt="Categories" coords="227,0,305,22" href="index.phtml?s=categories" title="Categories">
+<area shape="rect" alt="Shipping" coords="314,0,381,22" href="index.phtml?s=shipping" title="Shipping">
+<area shape="rect" alt="Sale Items" coords="390,0,438,22" href="index.phtml?s=sales" title="Sale Items">
+<area shape="rect" alt="Transactions" coords="446,0,535,22" href="index.phtml?s=transactions" title="Transactions">
+<area shape="rect" alt="Templates" coords="545,0,619,22" href="index.phtml?s=templates" title="Templates">
+<area shape="default" nohref>
+</map>
+';
+  }
+
+  if ($s == "inventory") {
+    $img = "img/nav-inventory.gif";
+    $mapname = "nav-inventory";
+    $map = '
+<map name="nav-inventory">
+<area shape="rect" alt="Home" coords="11,0,66,22" href="index.phtml" title="Home">
+<area shape="rect" alt="Configuration" coords="74,0,124,22" href="index.phtml?s=config" title="Configuration">
+<area shape="rect" alt="Inventory" coords="131,0,218,22" href="index.phtml?s=inventory" title="Inventory">
+<area shape="rect" alt="Categories" coords="228,0,305,22" href="index.phtml?s=categories" title="Categories">
+<area shape="rect" alt="Shipping" coords="313,0,382,22" href="index.phtml?s=shipping" title="Shipping">
+<area shape="rect" alt="Sale Items" coords="388,0,437,22" href="index.phtml?s=sales" title="Sale Items">
+<area shape="rect" alt="Transactions" coords="446,0,535,22" href="index.phtml?s=transactions" title="Transactions">
+<area shape="rect" alt="Templates" coords="544,0,619,22" href="index.phtml?s=templates" title="Templates">
+<area shape="default" nohref>
+</map>
+';
+  }
+
+  if ($s == "categories") {
+    $img = "img/nav-categories.gif";
+    $mapname = "nav-categories";
+    $map = '
+<map name="nav-categories">
+<area shape="rect" alt="Home" coords="11,0,66,22" href="index.phtml" title="Home">
+<area shape="rect" alt="Configuration" coords="73,0,128,22" href="index.phtml?s=config" title="Configuration">
+<area shape="rect" alt="Inventory" coords="135,0,203,22" href="index.phtml?s=inventory" title="Inventory">
+<area shape="rect" alt="Categories" coords="210,0,306,22" href="index.phtml?s=categories" title="Categories">
+<area shape="rect" alt="Shipping" coords="314,0,381,22" href="index.phtml?s=shipping" title="Shipping">
+<area shape="rect" alt="Sale Items" coords="389,0,438,22" href="index.phtml?s=sales" title="Sale Items">
+<area shape="rect" alt="Transactions" coords="446,0,536,22" href="index.phtml?s=transactions" title="Transactions">
+<area shape="rect" alt="Templates" coords="545,1,620,22" href="index.phtml?s=templates" title="Templates">
+<area shape="default" nohref>
+</map>
+';
+  }
+
+  if ($s == "shipping") {
+    $img = "img/nav-shipping.gif";
+    $mapname = "nav-shipping";
+    $map = '
+<map name="nav-shipping">
+<area shape="rect" alt="Home" coords="12,0,64,22" href="index.phtml" title="Home">
+<area shape="rect" alt="Configuration" coords="74,0,127,22" href="index.phtml?s=config" title="Configuration">
+<area shape="rect" alt="Inventory" coords="136,0,207,22" href="index.phtml?s=inventory" title="Inventory">
+<area shape="rect" alt="Categories" coords="218,0,290,22" href="index.phtml?s=categories" title="Categories">
+<area shape="rect" alt="Shipping" coords="297,0,380,22" href="index.phtml?s=shipping" title="Shipping">
+<area shape="rect" alt="Sale Items" coords="390,0,437,22" href="index.phtml?s=sales" title="Sale Items">
+<area shape="rect" alt="Transactions" coords="446,0,536,22" href="index.phtml?s=transactions" title="Transactions">
+<area shape="rect" alt="Templates" coords="544,0,620,22" href="index.phtml?s=templates" title="Templates">
+<area shape="default" nohref>
+</map>
+';
+  }
+
+  if ($s == "sales") {
+    $img = "img/nav-sales.gif";
+    $mapname = "nav-sales";
+    $map = '
+<map name="nav-sales">
+<area shape="rect" alt="Home" coords="13,0,66,22" href="index.phtml" title="Home">
+<area shape="rect" alt="Configuration" coords="72,0,127,22" href="index.phtml?s=config" title="Configuration">
+<area shape="rect" alt="Inventory" coords="134,0,209,22" href="index.phtml?s=inventory" title="Inventory">
+<area shape="rect" alt="Categories" coords="217,0,295,22" href="index.phtml?s=categories" title="Categories">
+<area shape="rect" alt="Shipping" coords="304,0,366,22" href="index.phtml?s=shipping" title="Shipping">
+<area shape="rect" alt="Sale Items" coords="371,0,439,22" href="index.phtml?s=sales" title="Sale Items">
+<area shape="rect" alt="Transactions" coords="447,0,534,22" href="index.phtml?s=transactions" title="Transactions">
+<area shape="rect" alt="Templates" coords="546,0,620,22" href="index.phtml?s=templates" title="Templates">
+<area shape="default" nohref>
+</map>
+';
+  }
+
+  if ($s == "transactions") {
+    $img = "img/nav-transactions.gif";
+    $mapname = "nav-transactions";
+    $map = '
+<map name="nav-transactions">
+<area shape="rect" alt="Home" coords="13,0,66,22" href="index.phtml" title="Home">
+<area shape="rect" alt="Configuration" coords="72,0,127,22" href="index.phtml?s=config" title="Configuration">
+<area shape="rect" alt="Inventory" coords="134,0,209,22" href="index.phtml?s=inventory" title="Inventory">
+<area shape="rect" alt="Categories" coords="217,0,295,22" href="index.phtml?s=categories" title="Categories">
+<area shape="rect" alt="Templates" coords="546,0,620,22" href="index.phtml?s=templates" title="Templates">
+<area shape="rect" alt="Shipping" coords="303,0,370,22" href="index.phtml?s=shipping" title="Shipping">
+<area shape="rect" alt="Sale Items" coords="380,0,423,22" href="index.phtml?s=sales" title="Sale Items">
+<area shape="rect" alt="Transactions" coords="430,0,536,22" href="index.phtml?s=transactions" title="Transactions">
+<area shape="default" nohref>
+</map>
+';
+  }
+
+  if ($s == "templates") {
+    $img = "img/nav-templates.gif";
+    $mapname = "nav-templates";
+    $map = '
+<map name="nav-templates">
+<area shape="rect" alt="Home" coords="13,0,66,22" href="index.phtml" title="Home">
+<area shape="rect" alt="Configuration" coords="72,0,127,22" href="index.phtml?s=config" title="Configuration">
+<area shape="rect" alt="Inventory" coords="134,0,209,22" href="index.phtml?s=inventory" title="Inventory">
+<area shape="rect" alt="Categories" coords="217,0,295,22" href="index.phtml?s=categories" title="Categories">
+<area shape="rect" alt="Shipping" coords="303,0,370,22" href="index.phtml?s=shipping" title="Shipping">
+<area shape="rect" alt="Sale Items" coords="380,0,427,22" href="index.phtml?s=sales" title="Sale Items">
+<area shape="rect" alt="Transactions" coords="435,0,521,22" href="index.phtml?s=transactions" title="Transactions">
+<area shape="rect" alt="Templates" coords="528,1,621,22" href="index.phtml?s=templates" title="Templates">
+<area shape="default" nohref>
+</map>
+';
+  }
+?>
+
+<html>
+
+<head>
+<title><?php echo $config->store_name ?> Administrator</title>
+<base target="_top">
+</head>
+
+<?php echo $map ?>
+
+<body bgcolor=#000000 link=Green vlink=Green alink=Gray marginwidth=0 marginheight=0 topmargin=0 leftmargin=0>
+
+<table border=0 cellpadding=0 cellspacing=0 width=100% height=100%>
+<tr><td valign=bottom width=100% height=100%>
+<?php echo FONT1 ?>
+
+<br>
+
+<center>
+
+	<table border=0 width=85% cellpadding=0 cellspacing=0>
+	<tr>
+	<td>
+	<?php echo FONT1 ?><font color=#ffffff>
+	<font size="+2"><b><?php echo $config->store_name ?></b></font><br>
+	<b><a href="<?php echo $config->store_url ?>" target="_top"><?php echo $config->store_url ?></a></b>
+	</font></font>
+	</td>
+	
+	<td align=right>
+	<?php echo FONT1 ?><font color=#ffffff>
+	<?php echo date("l, F j, Y") ?>
+	</font></font>
+	</td>
+	</tr>
+	</table>
+
+</center>
+
+<p>
+
+<img width=640 height=23 src="<?php echo $img ?>" usemap=#<?php echo $mapname ?> border=0></font></td>
+</tr>
+</table>
+</body>
+
+</html>

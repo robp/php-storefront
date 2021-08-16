@@ -1,0 +1,124 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  if ($sku) {
+    $skus = explode(",", $sku);
+
+    for ($a = 0; $a < count($skus); $a++) {
+      $item = new Item(0, $skus[$a]);
+
+      if ($item->id)
+        $items[] = $item;
+    }
+  }
+
+  if ($step && $code_id && count($items)) {
+    $code = new DiscountCode(0, $code_id);
+
+    if ($code->id) {
+      for ($a = 0; $a < count($items); $a++) {
+        $query = "SELECT * FROM discount_assignments
+                  WHERE code_id = " . $code->id . "
+                  AND sku = '" . addslashes($items[$a]->sku) . "'";
+
+        if (!$sql_result = mysql_query($query, $sock)) {
+          echo mysql_error();
+          html_exit();
+        }
+
+        if (mysql_num_rows($sql_result)) {
+          $errmsg .= "Item " . $items[$a]->sku . 
+                     " already assigned to that discount code.<br>\n";
+        }
+        else {
+          $da = new DiscountAssignment();
+          $da->code_id = $code->id;
+          $da->sku = $items[$a]->sku;
+          $da->insert();
+        }
+      }
+
+      if (!$errmsg) {
+        header("Location: discassign.phtml\n\n");
+        exit();
+      }
+    }
+  }
+
+  $query = "SELECT * FROM discount_codes
+            ORDER BY description";
+
+  if (!$sql_result = mysql_query($query, $sock)) {
+    echo mysql_error();
+    html_exit();
+  }
+
+  for ($a = 0; $a < mysql_num_rows($sql_result); $a++) {
+    $dc = new DiscountCode(mysql_fetch_row($sql_result), 0);
+    $discountcodes[] = $dc;
+  }
+
+  html_head();
+?>
+
+<a href="scalecodes.phtml"><font color=Green>Scale Codes</font></a> |
+<a href="disccodes.phtml"><font color=Green>Discount Codes</font></a> |
+<b>Discount Assignments</b>
+
+<hr noshade size=1>
+
+<p>
+
+<?php if ($errmsg) echo "<b>$errmsg</b><p>\n\n"; ?>
+
+<p>
+
+<form action="<?php echo $PHP_SELF ?>" method="post">
+<input type=hidden name="step" value="1">
+<input type=hidden name="sku" value="<?php 
+  for ($a = 0; $a < count($items); $a++) {
+    if ($a) echo ",";
+    echo $items[$a]->sku;
+  }
+?>">
+
+<p>
+
+Select a Discount Code for use with these items:<p>
+
+<select name="code_id">
+<?php
+  for ($a = 0; $a < count($discountcodes); $a++) {
+    $dc = $discountcodes[$a];
+    printf("<option value=\"%d\">%s", $dc->id, $dc->description);
+  }
+?>
+</select>
+
+<input type=submit value="Continue">
+</form>
+
+<p>
+
+Items:
+
+<?php
+  echo "<ul>\n";
+  for ($a = 0; $a < count($items); $a++) { 
+    echo "<li>" . $items[$a]->sku . " " . $items[$a]->name . "\n";
+  }
+  echo "</ul>\n";
+?>
+
+<?php
+  html_tail();
+?>

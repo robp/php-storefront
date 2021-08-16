@@ -1,0 +1,99 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  $query = "SELECT * FROM discount_codes
+            ORDER BY id";
+
+  if (!$sql_result = mysql_query($query, $sock)) {
+    echo mysql_error();
+    html_exit();
+  }
+
+  for ($a = 0; $a < mysql_num_rows($sql_result); $a++) {
+    $dc = new DiscountCode(mysql_fetch_row($sql_result), 0);
+    $discountcodes[] = $dc;
+  }
+
+  if ($step) {
+    if ($delete && is_array($delete)) {
+      for ($b = 0; $b < count($delete); $b++) {
+        $da = new DiscountAssignment(0, $delete[$b]);
+        if ($da->id) {
+          $da->delete();
+          $errmsg = "Item(s) removed.";
+        }
+      }
+    }
+  }
+
+  html_head();
+?>
+
+<a href="scalecodes.phtml"><font color=Green>Scale Codes</font></a> |
+<a href="disccodes.phtml"><font color=Green>Discount Codes</font></a> |
+<b>Discount Assignments</b>
+
+<hr noshade size=1>
+
+<p>
+
+<?php if ($errmsg) echo "<b>$errmsg</b><p>\n\n"; ?>
+
+<p>
+<?php
+  $now = time();
+
+  for ($a = 0; $a < count($discountcodes); $a++) {
+    if (($now >= $discountcodes[$a]->start_time) && 
+        ($now < $discountcodes[$a]->end_time))
+      $active = 1;
+    else
+      $active = 0;
+
+    echo "<form action=" . $PHP_SELF . " method=\"post\">\n";
+    echo "<input type=hidden name=\"step\" value=\"1\">\n";
+    echo "<table border=0 cellpadding=4 cellspacing=0 width=560>\n";
+
+    printf("<tr bgcolor=#d0d0d0><td align=center valign=center width=100>%s<b>%s</b><br>(%s)<p><input type=submit value=\"&lt;&lt; Remove\"></font></td>\n",
+            FONT1, $discountcodes[$a]->description,
+            ($active == 1 ? "Active" : "Inactive"));
+
+    $query = "SELECT a.id, b.sku, b.name
+              FROM discount_assignments AS a, items AS b
+              WHERE a.code_id = " . $discountcodes[$a]->id . "
+              AND a.sku = b.sku
+              ORDER BY b.name, b.sku, a.id";
+
+    if (!$sql_result = mysql_query($query, $sock)) {
+      echo mysql_error();
+      html_exit();
+    }
+
+    printf("<td valign=top width=100%%><select size=5 name=\"delete[]\" multiple>", 
+            $discountcodes[$a]->id);
+
+    for ($b = 0; $b < mysql_num_rows($sql_result); $b++) {
+      $sql_result_row = mysql_fetch_row($sql_result);
+      printf("<option value=\"%d\">%s &nbsp; %s", $sql_result_row[0],
+               stripslashes($sql_result_row[1]), $sql_result_row[2]);
+    }
+
+    echo "</select></td></tr>\n</table>\n</form>\n\n";
+  }
+?>
+
+
+<p>
+
+<?php
+  html_tail();
+?>

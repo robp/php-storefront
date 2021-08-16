@@ -1,0 +1,279 @@
+<html>
+
+<head>
+<title>%STORE_NAME%: Checkout</title>
+</head>
+
+<body bgcolor=#FFFFFF>
+<font face="Arial, MS Sans Serif, Helvetica" size=2>
+<h1>%STORE_NAME%</h1>
+
+<h3>Checkout</h3>
+
+Please take a moment to verify that your order is correct. If you would like to make any changes, you can return to the <a href="%STORE_URL%">Store Menu</a> or to <a href="%VIEWBASKET_URL%?referer=%HTTP_REFERER%">Your Order</a>. All prices are in <b>Canadian dollars</b>.<p>
+
+When you are ready to continue, please fill out the form below.<p>
+
+<table border=0 cellpadding=0 cellspacing=0 width=100%>
+<tr>
+<td nowrap align=left width=180><font face="Arial, MS Sans Serif, Helvetica" size=1><b>Item</b></font></td>
+<td nowrap align=left><font face="Arial, MS Sans Serif, Helvetica" size=1><b>Part No.</b></font></td>
+<td nowrap align=right><font face="Arial, MS Sans Serif, Helvetica" size=1><b>Unit Price</b></font></td>
+<td nowrap align=center><font face="Arial, MS Sans Serif, Helvetica" size=1><b>Qty.</b></font></td>
+<td nowrap align=right><font face="Arial, MS Sans Serif, Helvetica" size=1><b>Price</b></font></td>
+</tr>
+
+<tr>
+<td colspan=5><img height=1 vspace=4 width=100% border=0 alt="Image" align=middle src="img/pixelblack.gif"></td>
+</tr>
+
+%BEGIN_LOOP%
+
+<tr>
+<td colspan=2 width=180><font face="Arial, MS Sans Serif, Helvetica" size=3><b>%BUNDLE_NAME%</b></font></td>
+
+<td align=right><font face="Arial, MS Sans Serif, Helvetica" size=1>$%BUNDLE_PRICE%</font></td>
+
+<td align=center><font face="Arial, MS Sans Serif, Helvetica" size=1>%BUNDLE_QUANTITY%</font></td>
+
+<td align=right><font face="Arial, MS Sans Serif, Helvetica" size=1><b>$%BUNDLE_SUBTOTAL%</b></font></td>
+
+</tr>
+
+%BEGIN_INNER_LOOP%
+
+<tr>
+<td><font face="Arial, MS Sans Serif, Helvetica" size=1>&nbsp;&nbsp;&nbsp;%PRODUCT_NAME%</font></td>
+
+<td valign=top align=left><font face="Arial, MS Sans Serif, Helvetica" size=1>%PRODUCT_SKU%</font></td>
+</tr>
+
+%END_INNER_LOOP%
+
+<tr>
+<td colspan=5><img height=1 vspace=4 width=100% border=0 alt="Image" align=middle src="img/pixelblack.gif"></td>
+</tr>
+
+%END_LOOP%
+
+%BEGIN_DISCOUNT%
+
+<tr bgcolor=#e0e0e0>
+<td colspan=4>
+<font face="Arial, MS Sans Serif, Helvetica" size=2>
+<b>Applicable discounts</b>
+</font>
+</td>
+<td align=right>
+<font face="Arial, MS Sans Serif, Helvetica" size=1>- $%DISCOUNT_VALUE%</font></td>
+<td> &nbsp; </td>
+</tr>
+
+<tr>
+<td colspan=5><img height=1 vspace=4 width=100% border=0 alt="Image" align=middle src="img/pixelblack.gif"></td>
+</tr>
+
+%END_DISCOUNT%
+
+<tr>
+<td colspan=5 align=right>
+
+  <table border=0 cellpadding=0 cellspacing=0>
+  <tr>
+  <td rowspan=3 width=10> </td>
+  <td rowspan=3 valign=center>
+  <font face="Arial, MS Sans Serif, Helvetica" size=1>
+  Applicable shipping charges will be added to your total, as indicated in the "Shipping Method" section below.
+  </td>
+  <td rowspan=3 width=10> </td>
+
+  <td align=right><font face="Arial, MS Sans Serif, Helvetica" size=1>PST&nbsp;&nbsp;$%ORDER_PST%</font></td>
+  </tr>
+  <tr>
+  <td align=right><font face="Arial, MS Sans Serif, Helvetica" size=1>GST&nbsp;&nbsp;$%ORDER_GST%</font></td>
+  </tr>
+  <tr>
+  <td align=right>
+
+    <table border=0 cellpadding=0 cellspacing=0 bordercolor=#000000>
+    <tr>
+    <td nowrap><font face="Arial, MS Sans Serif, Helvetica" size=1><b>Order Total</b> <font size=4 color=#CC0000><b>$%ORDER_TOTAL%</b></font></font></td>
+    </tr>
+    </table>
+
+  </td>
+  </tr>
+  </table>
+
+</td>
+</tr>
+</table>
+
+<p>
+
+<br>
+
+<table border=0 cellpadding=0 cellspacing=0>
+<tr>
+<td valign=top>
+<font face="Arial, MS Sans Serif, Helvetica" size=2>
+<b><font size=3>Billing Information</font></b><p>
+
+<blockquote>
+<b>Address</b><br>
+%BILL_FNAME% %BILL_LNAME%<br>
+%BILL_ADDRESS1% %BILL_ADDRESS2%<br>
+%BILL_CITY% %BILL_STATE%, %BILL_COUNTRY%<br>
+%BILL_ZIPCODE%
+
+<p>
+
+<b>Contacts</b><br>
+Daytime: %BILL_PHONE1%<br>
+Evening: %BILL_PHONE2%<br>
+Email: %BILL_EMAIL%
+</blockquote>
+</font>
+</td>
+<td width=20> &nbsp; </td>
+<td valign=top>
+<font face="Arial, MS Sans Serif, Helvetica" size=2>
+<b><font size=3>Shipping Information</font></b><p>
+
+<blockquote>
+<b>Address</b><br>
+%SHIP_FNAME% %SHIP_LNAME%<br>
+%SHIP_ADDRESS1% %SHIP_ADDRESS2%<br>
+%SHIP_CITY% %SHIP_STATE%, %SHIP_COUNTRY%<br>
+%SHIP_ZIPCODE%
+
+<p>
+
+<b>Contacts</b><br>
+Daytime: %SHIP_PHONE1%<br>
+Email: %SHIP_EMAIL%
+</blockquote>
+</font>
+</td>
+</tr>
+</table>
+
+<p><br>
+
+<form action="checkout.phtml" method="post">
+<input type=hidden name="step" value="3">
+<input type=hidden name="referer" value="%HTTP_REFERER%">
+
+<img height=1 hspace=0 vspace=4 width=350 border=0 alt=Image align=middle src="img/pixelblack.gif"><br>
+<font size=3><b>Shipping Method</b></font><p>
+
+<blockquote>
+
+The cost of shipping will be added to your order total.<p>
+
+%BEGIN_SHIPPING%
+<select name="ship_method">
+%BEGIN_SHIPPING_LOOP%
+<option value="%SHIPMETHOD_ID%">%SHIPMETHOD_NAME%: $%SHIPMETHOD_COST%
+%END_SHIPPING_LOOP%
+</select>
+%END_SHIPPING%
+
+</blockquote>
+
+<p>
+
+<img height=1 hspace=0 vspace=4 width=350 border=0 alt=Image align=middle src="img/pixelblack.gif"><br>
+<font size=3><b>Payment Information</b></font><p>
+
+<blockquote>
+
+<b><font color=Red>%MSG%</font></b><p>
+
+<table border=0 cellpadding=0 cellspacing=0>
+<tr>
+<td colspan=5 height=15>
+<font face="Arial, MS Sans Serif, Helvetica" size=1>
+                Card Type
+</font></td>
+</tr>
+<tr>
+
+<td align=left><input type=radio name="cc_type" value="mastercard"></td>
+<td><img height=24 hspace=0 vspace=0 width=38 border=0 alt=Image align=middle src="img/creditcardmastercard.gif"></td>
+<td width=15></td>
+<td><input type=radio name="cc_type" value="visa"></td>
+<td><img height=24 hspace=0 vspace=0 width=38 border=0 alt=Image align=middle src="img/creditcardvisa.gif"></td>
+<td width=15></td>
+<td><input type=radio name="cc_type" value="amex"></td>
+<td><img height=24 hspace=0 vspace=0 width=38 border=0 alt=Image align=middle src="img/creditcardamex.gif"></td>
+<td width=15></td>
+<td><input type=radio name="cc_type" value="discover"></td>
+<td><img height=24 hspace=0 vspace=0 width=38 border=0 alt=Image align=middle src="img/creditcarddiscover.gif"></td>
+</tr>
+</table>
+
+<p>
+
+<table border=0 cellpadding=0 cellspacing=0>
+<tr>
+<td height=15>
+<font face="Arial, MS Sans Serif, Helvetica" size=1>
+                Card Number
+</font></td>
+<td width=15></td>
+<td height=15 colspan=3>
+<font face="Arial, MS Sans Serif, Helvetica" size=1>
+                Expiration Date
+</font></td>
+</tr>
+<tr>
+<td><input maxlength=19 size=19 type=text name="cc_number"></td>
+<td width=15></td>
+
+<td><select name="cc_exp_month">
+<option value="01">01<option value="02">02<option value="03">03
+<option value="04">04<option value="05">05<option value="06">06
+<option value="07">07<option value="08">08<option value="09">09
+<option value="10">10<option value="11">11<option value="12">12
+</select></td>
+<td width=5><font face="Arial, MS Sans Serif, Helvetica" size=2><b>/</b></font></td>
+<td><select name="cc_exp_year">
+<option value="2000">2000
+<option value="2001">2001
+<option value="2002">2002
+<option value="2003">2003
+<option value="2004">2004
+<option value="2005">2005
+<option value="2006">2006
+<option value="2007">2007
+<option value="2008">2008
+</select></td>
+</tr>
+</table>
+
+<p>
+
+<font size=1>
+Note: %STORE_NAME% uses industry-standard SSL (Secure Sockets Layer) and Triple-DES (Data Encryption Standard) encryption to protect the confidentiality of your personal information.
+</font>
+
+</blockquote>
+
+<p>
+
+<table border=0 width=100% cellpadding=0 cellspacing=0>
+<tr><td align=right>
+<font face="Arial, MS Sans Serif, Helvetica" size=2>
+<input width=86 border=0 height=26 alt=Continue type=image name="Continue" src="img/buttoncontinue.gif">
+</font>
+</td></tr>
+</table>
+
+</form>
+
+</font>
+</body>
+
+</html>
+

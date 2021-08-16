@@ -1,0 +1,32 @@
+<html>
+
+<head>
+<title>%STORE_NAME%: Checkout</title>
+</head>
+
+<body bgcolor=#FFFFFF>
+<font face="Arial, MS Sans Serif, Helvetica" size=2>
+<h1>%STORE_NAME%</h1>
+
+<h3>Checkout</h3>
+
+<b>Order #:</b> %ORDER_REFNO%<br>
+<b>Auth #:</b> %ORDER_AUTHNO%<p>
+
+Thank you for shopping at %STORE_NAME%! You should receive an electronic receipt in your email shortly. If you have any questions or comments about your order, please notify us at your convenience.<p>
+
+<a href="%HTTP_REFERER%"><img width=148 height=26 border=0 alt="Continue Shopping" src="img/buttoncontinueshopping.gif"></a><p>
+
+Here is a copy of your electronic receipt. We recommend printing (or saving) this page for future reference.<p>
+
+<font face="Courier New, Courier" size="-1">
+<pre>
+%ORDER_RECEIPT%
+</pre>
+</font>
+
+</font>
+</body>
+
+</html>
+

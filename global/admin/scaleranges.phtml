@@ -1,0 +1,191 @@
+<?php
+  // Get some configuration constants and functions
+  require("../inc/global_config.inc");
+  require("../inc/config.inc");
+  require("../inc/classes.inc");
+  require("../inc/functions.inc");
+  require("../inc/html.inc");
+
+  // Connect to the SQL server and select the database
+  $sock = db_connect();
+  $config = new Config();
+
+  if ($id)
+    $scalecode = new ScaleCode(0, $id);
+
+  if (!$scalecode->id) {
+    echo "Invalid scale code id.";
+    exit();
+  }
+
+  if ($step) {
+    $query = "SELECT * FROM scale_ranges
+              WHERE code_id = $scalecode->id
+              ORDER BY threshold, value";
+
+    if (!$sql_result = mysql_query($query, $sock)) {
+      echo mysql_error();
+      html_exit();
+    }
+
+    for ($a = 0; $a < mysql_num_rows($sql_result); $a++) {
+      $item = new ScaleRange(mysql_fetch_row($sql_result), 0);
+
+      $thresh_var = $item->id . "-threshold";
+      $value_var = $item->id . "-value";
+      $type_var = $item->id . "-type";
+
+      if (strlen($$thresh_var) && strlen($$value_var) && strlen($$type_var)) {
+        if ($$thresh_var == "max")
+          $item->threshold = 999999999;
+        else
+          $item->threshold = $$thresh_var;
+
+        $item->value = $$value_var;
+        $item->type = $$type_var;
+        $item->update();
+      }
+    }
+  }
+
+  if ($step && $delete && is_array($delete)) {
+    for ($a = 0; $a < count($delete); $a++) {
+      $item = new ScaleRange(0, $delete[$a]);
+      $item->delete();
+    }
+  }
+
+  if ($step && $new_threshold && strlen($new_value) && strlen($new_type)) {
+    $newitem = new ScaleRange();
+
+    $newitem->code_id = $scalecode->id;
+
+    if ($new_threshold == "max")
+      $newitem->threshold = 999999999;
+    else
+      $newitem->threshold = $new_threshold;
+
+    $newitem->value = $new_value;
+    $newitem->type = $new_type;
+
+    $newitem->insert();
+
+    $errmsg = "Ranges adjusted.";
+  }
+
+  $query = "SELECT * FROM scale_ranges
+            WHERE code_id = $scalecode->id
+            ORDER BY threshold";
+
+  if (!$sql_result = mysql_query($query, $sock)) {
+    echo mysql_error();
+    html_exit();
+  }
+
+  for ($a = 0; $a < mysql_num_rows($sql_result); $a++) {
+    $item = new ScaleRange(mysql_fetch_row($sql_result), 0);
+    $thresholds[] = $item;
+  }
+
+  html_head();
+?>
+
+<b>Scale Codes</b> |
+<a href="disccodes.phtml"><font color=Green>Discount Codes</font></a> |
+<a href="discassign.phtml"><font color=Green>Discount Assignments</font></a>
+
+<hr noshade size=1>
+
+<p>
+
+<?php if ($errmsg) echo "<b>$errmsg</b><p>\n\n"; ?>
+
+<ul>
+<li><a href="scalecodes.phtml">Back to Scale Codes</a>
+</ul>
+
+<p>
+
+<h3>Edit Ranges - <?php echo $scalecode->description ?></h3>
+
+<form action="<?php echo $PHP_SELF ?>" method="post">
+<input type=hidden name="id" value="<?php echo $scalecode->id ?>">
+<input type=hidden name="step" value="1">
+
+
+<table border=2 cellpadding=4 cellspacing=0 width=400>
+<tr>
+<td colspan=4><?php echo FONT1 ?>
+<br>
+<blockquote>
+Adjust your scale ranges, values and types for this scale code. The Threshold value is the maximum value for which a particular discount will apply. Use a threshold of <b>max</b> to specify a maximum value.
+<p>
+</blockquote>
+<center><input type=reset value="     Reset     "> &nbsp;&nbsp; <input type=submit value="Update Ranges"></center>
+<br>
+</font></td>
+</tr>
+
+<tr>
+<td align=center><?php echo FONT1 ?>
+<b>Delete</b>
+</td>
+<td align=center width=50%><?php echo FONT1 ?>
+<b>Threshold</b>
+</td>
+<td align=center width=50%><?php echo FONT1 ?>
+<b>Value</b>
+</td>
+<td align=center><?php echo FONT1 ?>
+<b>Discount Type</b>
+</td>
+</tr>
+
+<?php
+  for ($a = 0; $a < count($thresholds); $a++) {
+    printf("<tr><td align=center valign=center><input type=checkbox name=\"delete[]\" value=\"%d\"></td><td align=center><input type=text name=\"%d-threshold\" size=10 maxlength=10 value=\"%s\"></td><td align=center><input type=text name=\"%d-value\" size=10 maxlength=10 value=\"%.2f\"></td>",
+      $thresholds[$a]->id, $thresholds[$a]->id, (($thresholds[$a]->threshold == 999999999) ? "max" : $thresholds[$a]->threshold), $thresholds[$a]->id, $thresholds[$a]->value);
+
+    printf("<td><select name=\"%d-type\">", $thresholds[$a]->id);
+
+    for ($b = 0; $b < count($SCALE_RANGE_TYPES); $b++) {
+      $range_type = $SCALE_RANGE_TYPES[$b];
+      printf("<option value=\"%d\"%s>%s", $range_type[0],
+             ($thresholds[$a]->type == $range_type[0] ? " selected" : ""),
+             $range_type[1]);
+    }
+
+    printf("</select></td></tr>\n");
+  }
+?>
+
+<tr>
+<td>&nbsp;</td>
+<td align=center>
+<?php echo FONT1 ?>New Value</font><br>
+<input type=text name="new_threshold" size=10 maxlength=10>
+</td>
+<td align=center>
+<?php echo FONT1 ?>New Value</font><br>
+<input type=text name="new_value" size=10 maxlength=10>
+</td>
+<td align=center>
+<?php echo FONT1 ?>New Type</font><br>
+<select name="new_type">
+<?php
+    for ($b = 0; $b < count($SCALE_RANGE_TYPES); $b++) {
+      $range_type = $SCALE_RANGE_TYPES[$b];
+      printf("<option value=\"%d\">%s", $range_type[0], $range_type[1]);
+    }
+?>
+</select>
+</td>
+</tr>
+
+</table>
+
+</form>
+
+<?php
+  html_tail();
+?>
